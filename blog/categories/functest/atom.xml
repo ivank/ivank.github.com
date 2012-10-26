@@ -4,7 +4,7 @@
   <title><![CDATA[Category: functest | Develop Simply]]></title>
   <link href="http://ivank.github.com/blog/categories/functest/atom.xml" rel="self"/>
   <link href="http://ivank.github.com/"/>
-  <updated>2012-10-26T15:49:44+03:00</updated>
+  <updated>2012-10-26T20:26:29+03:00</updated>
   <id>http://ivank.github.com/</id>
   <author>
     <name><![CDATA[Ivan Kerin]]></name>
@@ -12,6 +12,59 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[The joy of (Func)Testing]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/the-joy-of-func-testing/"/>
+    <updated>2012-10-26T19:42:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/the-joy-of-func-testing</id>
+    <content type="html"><![CDATA[<p>Testing in PHP has always been hard - PHP Devs generally just don't "get it". There have been some recent developments from Symfony camp, but again they are not easily integratable with Kohana - the framework I'm most interested in. And the saddest thing is there are great testing frameworks out there in other languages and the fact that nobody has tried to accomplish something similar in PHP is just heartbreaking. I mean - the best answer to "how to do functional testing in PHP" is "selenium with PHPUnit", even if what you want to test is just some form input without any javascript - that can get tough on you.</p>
+
+<p>Anyway I rolled up my sleeves and started on the long and perilous journey of writing my own testing framework. Well not exactly - I mostly got the DSL idea from Capybara, and wrote it on top of Kohana Unittest (PHPUnit) but the result is I think quite significant in itself.</p>
+
+<h2><a href="https://github.com/OpenBuildings/functest">FuncTest</a></h2>
+
+<p>The core principles of FuncTest are to be as easy to write the test as possible, and to execute it as fast as possible. Great! But what does that mean in practice? Here's an example test, straight from the docs:</p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct script access.');</p>
+
+<p>class myTest extends FuncTest_TestCase {</p>
+
+<pre><code>public function test_finders()
+{
+    $this
+        -&gt;visit('/my/url')
+        -&gt;fill_in('Name', 'John')
+        -&gt;fill_in('Username', 'john-user')
+        -&gt;select('Select Year', '2004')
+        -&gt;check('Recieve Newsletter')
+        -&gt;click_button('Create User');
+}
+</code></pre>
+
+<p>}
+?>
+```
+Looks easy right? Well it will do exactly what you think it would:</p>
+
+<ul>
+<li>Go to URL /my/url</li>
+<li>Fill in the input tag labeled with 'John' (yes labeled - like a label tag with a for='id' that matches the id of the input tag)</li>
+<li>Fill in the input tag labeled Username with 'john-user'</li>
+<li>Select 2004 from the dropdown labeled 'Select Year'</li>
+<li>Check the checkbox labeled 'Recieve Newsletter'</li>
+<li>Click the button 'Create User'</li>
+</ul>
+
+
+<p>Why use titles / labels instead of 'name' attributes or even css selectors, well - if you wanted to you can, and that too is pretty easy, but in my experience the texts change much less frequently than the internal stuff.</p>
+
+<p>And the best part is - this will work with the Kohana classes themselves internally (actually using HMVC patterns for special internal requests) - so there are no network, apache or Kohana framework overhead whatsoever.</p>
+
+<p>And ... just one more thing - if you want to run this in selenium (for ajax testing for example): just add <code>public $driver_name = 'selenium'</code> to your class - and you're good to go - the same test will run by actually opening up your browser and filling in these fields.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[New open source libraries]]></title>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: services-manager | Develop Simply]]></title>
   <link href="http://ivank.github.com/blog/categories/services-manager/atom.xml" rel="self"/>
   <link href="http://ivank.github.com/"/>
-  <updated>2012-10-26T15:49:44+03:00</updated>
+  <updated>2012-10-26T20:26:29+03:00</updated>
   <id>http://ivank.github.com/</id>
   <author>
     <name><![CDATA[Ivan Kerin]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Managing Unreliability with Services]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/managing-unreliability-with-services/"/>
+    <updated>2012-10-26T19:05:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/managing-unreliability-with-services</id>
+    <content type="html"><![CDATA[<p>Today I'm gonna introduce the <a href="https://github.com/OpenBuildings/services-manager">services manager module</a>. It's probably the project that is most unfinished and a little bit rough around the edges, however even in its current, toddler state it can seriously reduce the complexity of relying on 3rd party services. What you can do with it is encapsulate all the code needed to talking with a 3rd party service - be it Google Analytics, Facebook SDK or even Beanstalkd queue in a single class / library. But not any old class - it's built around the idea that if a service goes "oops" and doesn't work anymore for whatever reason - you can disable it and still have a working application. Having such a separation is also great if you want to have different services working in Testing / Development / Production (or even working with different configs). Additionally each service handles its own javascript / css inclusions so this happens transparently to you. You can even say "I want to run this service in development, but on production I want only normal users to see it, exclude the admins".</p>
+
+<p>You might tell yourself "why do I need this, including a bunch of Google Analytics code is not that hard" - and you would be right - but the more services you rely on the harder it gets to manage them (like - exponentially harder), so why not make your life easier from the beginning.</p>
+
+<p>So, lets try a concrete example - we want to add Google Analytics. Our config code would look something like this:</p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct access allowed.');
+return array(</p>
+
+<pre><code>'services' =&gt; array(
+    'googleanalytics' =&gt; array(
+        'api-key' =&gt; '{api key}',
+        'enabled' =&gt; Kohana::$environment === Kohana::PRODUCTION,
+        'disabled-for-role' =&gt; 'admin',
+    ),
+),
+</code></pre>
+
+<p>);
+?>
+```</p>
+
+<p>And you will need to have a <code>&lt;?php echo Service::all_bodies(); ?&gt;</code> in the end of your main HTML template body, and <code>&lt;?php echo Service::all_heads(); ?&gt;</code> in the head tag of the template, allowing any service to position its asset files in the most convenient location. But that's about it - you now have a service that works only in Production environment, and even then it will be disabled for logged in users that have the role "admin" - pretty neat, ah?</p>
+
+<p>There is a lot of built in services already available, for example, enabling chartbeat is just a few lines of config:</p>
+
+<pre><code>'chartbeat' =&gt; array(
+    'enabled' =&gt; Kohana::$environment === array(Kohana::PRODUCTION,
+    'config' =&gt; array('uid' =&gt; 'your key' , 'domain' =&gt; 'your domain'),
+),
+</code></pre>
+
+<p>And you don't have to worry where the javascript will go, and not tracking people in dev environment, and generally makes you a more happy developer.</p>
+
+<p>But the main idea is that any service is easily converted to this system and you can create your own services for internal APIs and whatnot with the same flexibility of deployment. You just have to override the relevant abstract methods and you're good to go.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[New open source libraries]]></title>

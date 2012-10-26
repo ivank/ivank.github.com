@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Timestamped Migrations - Develop Simply</title>
+  <title>Managing Unreliability with Services - Develop Simply</title>
   <meta name="author" content="Ivan Kerin">
 
   
-  <meta name="description" content="All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the &hellip;">
+  <meta name="description" content="Today I&#8217;m gonna introduce the services manager module. It&#8217;s probably the project that is most unfinished and a little bit rough around &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://ivank.github.com/blog/2011/11/timestamped-migrations/">
+  <link rel="canonical" href="http://ivank.github.com/blog/2012/10/managing-unreliability-with-services/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">Timestamped Migrations</h1>
+      <h1 class="entry-title">Managing Unreliability With Services</h1>
     
     
       <p class="meta">
@@ -96,41 +96,18 @@
   
 
 
-<time datetime="2011-11-07T22:51:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
+<time datetime="2012-10-26T19:05:00+03:00" pubdate data-updated="true">Oct 26<span>th</span>, 2012</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the tools for that for <a href="http://kohanaframework.org/">Kohana 3</a> are of course &#8230; you got it - lacking. There is <a href="https://github.com/jmhobbs/kohana-3-migrations">Kohana-3-migraitons</a> - but versioned migrations work only for a single developer - if that&#8217;s your situation - I envy you, I really do - so much less headache. But when you try to collaborate database changes, especially with git/svn managing your files - you soon start to say very inappropriate words, very very loudly. So I went on and rewrote null77&#8217;s excellent module <a href="http://code.google.com/p/kohana-migrations/">kohana-migrations</a> for Kohana 3 - <a href="https://github.com/OpenBuildings/timestamped-migrations">Timestamped Migrations</a>, but with some more sugar.</p>
+<div class="entry-content"><p>Today I&#8217;m gonna introduce the <a href="https://github.com/OpenBuildings/services-manager">services manager module</a>. It&#8217;s probably the project that is most unfinished and a little bit rough around the edges, however even in its current, toddler state it can seriously reduce the complexity of relying on 3rd party services. What you can do with it is encapsulate all the code needed to talking with a 3rd party service - be it Google Analytics, Facebook SDK or even Beanstalkd queue in a single class / library. But not any old class - it&#8217;s built around the idea that if a service goes &#8220;oops&#8221; and doesn&#8217;t work anymore for whatever reason - you can disable it and still have a working application. Having such a separation is also great if you want to have different services working in Testing / Development / Production (or even working with different configs). Additionally each service handles its own javascript / css inclusions so this happens transparently to you. You can even say &#8220;I want to run this service in development, but on production I want only normal users to see it, exclude the admins&#8221;.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git clone git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations
-</span></code></pre></td></tr></table></div></figure>
+<p>You might tell yourself &#8220;why do I need this, including a bunch of Google Analytics code is not that hard&#8221; - and you would be right - but the more services you rely on the harder it gets to manage them (like - exponentially harder), so why not make your life easier from the beginning.</p>
 
-
-<p>Or</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git submodule git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations
-</span><span class='line'>git submodule update --init
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So now your migrations will look like</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>1319717756_initial.php
-</span><span class='line'>1319717856_migrate_users_and_roles.php
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Might seem a bit too verbose, but it&#8217;s a godsend when you have more than one person on a project - you can just drop a migration file and have it execute in just the right place and order - delightfully convenient.</p>
-
-<p>I personally detest web interfaces for those kind of tasks - exposing system tools to a webserver seem &#8230; unclean, so I&#8217;ve ditched the controllers and views, and implemented simple CLI for this, using <a href="https://github.com/OpenBuildings/kohana-cli">Kohana-cli</a> and mimicking rails&#8217; syntax as much as possible. Check it out.</p>
+<p>So, lets try a concrete example - we want to add Google Analytics. Our config code would look something like this:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -138,16 +115,38 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>kohana db:version
-</span><span class='line'>kohana db:migrate
-</span><span class='line'>kohana db:migrate:up
-</span><span class='line'>kohana db:migrate:down --step<span class="o">=</span>4
-</span><span class='line'>kohana db:migrate:redo --version<span class="o">=</span>1319717756
-</span><span class='line'>kohana db:rollback
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span> <span class="nb">defined</span><span class="p">(</span><span class="s1">&#39;SYSPATH&#39;</span><span class="p">)</span> <span class="k">OR</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;No direct access allowed.&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="k">return</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>  <span class="s1">&#39;services&#39;</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>      <span class="s1">&#39;googleanalytics&#39;</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>          <span class="s1">&#39;api-key&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;{api key}&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s1">&#39;enabled&#39;</span> <span class="o">=&gt;</span> <span class="nx">Kohana</span><span class="o">::</span><span class="nv">$environment</span> <span class="o">===</span> <span class="nx">Kohana</span><span class="o">::</span><span class="na">PRODUCTION</span><span class="p">,</span>
+</span><span class='line'>          <span class="s1">&#39;disabled-for-role&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">),</span>
+</span><span class='line'>  <span class="p">),</span>
+</span><span class='line'><span class="p">);</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>You can read all about it at the github <a href="https://github.com/OpenBuildings/timestamped-migrations/blob/master/README.md">README file</a>. Enjoy.</p>
+<p>And you will need to have a <code>&lt;?php echo Service::all_bodies(); ?&gt;</code> in the end of your main HTML template body, and <code>&lt;?php echo Service::all_heads(); ?&gt;</code> in the head tag of the template, allowing any service to position its asset files in the most convenient location. But that&#8217;s about it - you now have a service that works only in Production environment, and even then it will be disabled for logged in users that have the role &#8220;admin&#8221; - pretty neat, ah?</p>
+
+<p>There is a lot of built in services already available, for example, enabling chartbeat is just a few lines of config:</p>
+
+<pre><code>'chartbeat' =&gt; array(
+    'enabled' =&gt; Kohana::$environment === array(Kohana::PRODUCTION,
+    'config' =&gt; array('uid' =&gt; 'your key' , 'domain' =&gt; 'your domain'),
+),
+</code></pre>
+
+<p>And you don&#8217;t have to worry where the javascript will go, and not tracking people in dev environment, and generally makes you a more happy developer.</p>
+
+<p>But the main idea is that any service is easily converted to this system and you can create your own services for internal APIs and whatnot with the same flexibility of deployment. You just have to override the relevant abstract methods and you&#8217;re good to go.</p>
 </div>
 
 
@@ -170,12 +169,12 @@
   
 
 
-<time datetime="2011-11-07T22:51:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
+<time datetime="2012-10-26T19:05:00+03:00" pubdate data-updated="true">Oct 26<span>th</span>, 2012</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/kohana/'>Kohana</a>
+    <a class='category' href='/blog/categories/services-manager/'>services-manager</a>
   
 </span>
 
@@ -184,7 +183,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2011/11/timestamped-migrations/" data-via="" data-counturl="http://ivank.github.com/blog/2011/11/timestamped-migrations/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2012/10/managing-unreliability-with-services/" data-via="" data-counturl="http://ivank.github.com/blog/2012/10/managing-unreliability-with-services/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -197,10 +196,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2011/11/command-line-interfaces-rule/" title="Previous Post: Command Line Interfaces Rule">&laquo; Command Line Interfaces Rule</a>
+        <a class="basic-alignment left" href="/blog/2012/10/new-opensoure-libraries/" title="Previous Post: New open source libraries">&laquo; New open source libraries</a>
       
       
-        <a class="basic-alignment right" href="/blog/2011/11/big-update-to-migration/" title="Next Post: Big update to migration">Big update to migration &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2012/10/the-joy-of-func-testing/" title="Next Post: The joy of (Func)Testing">The joy of (Func)Testing &raquo;</a>
       
     </p>
   </footer>

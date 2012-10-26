@@ -4,7 +4,7 @@
   <title><![CDATA[Develop Simply]]></title>
   <link href="http://ivank.github.com/atom.xml" rel="self"/>
   <link href="http://ivank.github.com/"/>
-  <updated>2012-10-26T15:49:44+03:00</updated>
+  <updated>2012-10-26T20:26:29+03:00</updated>
   <id>http://ivank.github.com/</id>
   <author>
     <name><![CDATA[Ivan Kerin]]></name>
@@ -12,6 +12,126 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[The joy of (Func)Testing]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/the-joy-of-func-testing/"/>
+    <updated>2012-10-26T19:42:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/the-joy-of-func-testing</id>
+    <content type="html"><![CDATA[<p>Testing in PHP has always been hard - PHP Devs generally just don&#8217;t &#8220;get it&#8221;. There have been some recent developments from Symfony camp, but again they are not easily integratable with Kohana - the framework I&#8217;m most interested in. And the saddest thing is there are great testing frameworks out there in other languages and the fact that nobody has tried to accomplish something similar in PHP is just heartbreaking. I mean - the best answer to &#8220;how to do functional testing in PHP&#8221; is &#8220;selenium with PHPUnit&#8221;, even if what you want to test is just some form input without any javascript - that can get tough on you.</p>
+
+<p>Anyway I rolled up my sleeves and started on the long and perilous journey of writing my own testing framework. Well not exactly - I mostly got the DSL idea from Capybara, and wrote it on top of Kohana Unittest (PHPUnit) but the result is I think quite significant in itself.</p>
+
+<h2><a href="https://github.com/OpenBuildings/functest">FuncTest</a></h2>
+
+<p>The core principles of FuncTest are to be as easy to write the test as possible, and to execute it as fast as possible. Great! But what does that mean in practice? Here&#8217;s an example test, straight from the docs:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span> <span class="nb">defined</span><span class="p">(</span><span class="s1">&#39;SYSPATH&#39;</span><span class="p">)</span> <span class="k">OR</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;No direct script access.&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">myTest</span> <span class="k">extends</span> <span class="nx">FuncTest_TestCase</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">test_finders</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$this</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">visit</span><span class="p">(</span><span class="s1">&#39;/my/url&#39;</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">fill_in</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;John&#39;</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">fill_in</span><span class="p">(</span><span class="s1">&#39;Username&#39;</span><span class="p">,</span> <span class="s1">&#39;john-user&#39;</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">select</span><span class="p">(</span><span class="s1">&#39;Select Year&#39;</span><span class="p">,</span> <span class="s1">&#39;2004&#39;</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">check</span><span class="p">(</span><span class="s1">&#39;Recieve Newsletter&#39;</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">click_button</span><span class="p">(</span><span class="s1">&#39;Create User&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Looks easy right? Well it will do exactly what you think it would:</p>
+
+<ul>
+<li>Go to URL /my/url</li>
+<li>Fill in the input tag labeled with &#8216;John&#8217; (yes labeled - like a label tag with a for=&#8217;id&#8217; that matches the id of the input tag)</li>
+<li>Fill in the input tag labeled Username with &#8216;john-user&#8217;</li>
+<li>Select 2004 from the dropdown labeled &#8216;Select Year&#8217;</li>
+<li>Check the checkbox labeled &#8216;Recieve Newsletter&#8217;</li>
+<li>Click the button &#8216;Create User&#8217;</li>
+</ul>
+
+
+<p>Why use titles / labels instead of &#8216;name&#8217; attributes or even css selectors, well - if you wanted to you can, and that too is pretty easy, but in my experience the texts change much less frequently than the internal stuff.</p>
+
+<p>And the best part is - this will work with the Kohana classes themselves internally (actually using HMVC patterns for special internal requests) - so there are no network, apache or Kohana framework overhead whatsoever.</p>
+
+<p>And &#8230; just one more thing - if you want to run this in selenium (for ajax testing for example): just add <code>public $driver_name = 'selenium'</code> to your class - and you&#8217;re good to go - the same test will run by actually opening up your browser and filling in these fields.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Managing Unreliability with Services]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/managing-unreliability-with-services/"/>
+    <updated>2012-10-26T19:05:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/managing-unreliability-with-services</id>
+    <content type="html"><![CDATA[<p>Today I&#8217;m gonna introduce the <a href="https://github.com/OpenBuildings/services-manager">services manager module</a>. It&#8217;s probably the project that is most unfinished and a little bit rough around the edges, however even in its current, toddler state it can seriously reduce the complexity of relying on 3rd party services. What you can do with it is encapsulate all the code needed to talking with a 3rd party service - be it Google Analytics, Facebook SDK or even Beanstalkd queue in a single class / library. But not any old class - it&#8217;s built around the idea that if a service goes &#8220;oops&#8221; and doesn&#8217;t work anymore for whatever reason - you can disable it and still have a working application. Having such a separation is also great if you want to have different services working in Testing / Development / Production (or even working with different configs). Additionally each service handles its own javascript / css inclusions so this happens transparently to you. You can even say &#8220;I want to run this service in development, but on production I want only normal users to see it, exclude the admins&#8221;.</p>
+
+<p>You might tell yourself &#8220;why do I need this, including a bunch of Google Analytics code is not that hard&#8221; - and you would be right - but the more services you rely on the harder it gets to manage them (like - exponentially harder), so why not make your life easier from the beginning.</p>
+
+<p>So, lets try a concrete example - we want to add Google Analytics. Our config code would look something like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span> <span class="nb">defined</span><span class="p">(</span><span class="s1">&#39;SYSPATH&#39;</span><span class="p">)</span> <span class="k">OR</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;No direct access allowed.&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="k">return</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>  <span class="s1">&#39;services&#39;</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>      <span class="s1">&#39;googleanalytics&#39;</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>          <span class="s1">&#39;api-key&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;{api key}&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s1">&#39;enabled&#39;</span> <span class="o">=&gt;</span> <span class="nx">Kohana</span><span class="o">::</span><span class="nv">$environment</span> <span class="o">===</span> <span class="nx">Kohana</span><span class="o">::</span><span class="na">PRODUCTION</span><span class="p">,</span>
+</span><span class='line'>          <span class="s1">&#39;disabled-for-role&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">),</span>
+</span><span class='line'>  <span class="p">),</span>
+</span><span class='line'><span class="p">);</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And you will need to have a <code>&lt;?php echo Service::all_bodies(); ?&gt;</code> in the end of your main HTML template body, and <code>&lt;?php echo Service::all_heads(); ?&gt;</code> in the head tag of the template, allowing any service to position its asset files in the most convenient location. But that&#8217;s about it - you now have a service that works only in Production environment, and even then it will be disabled for logged in users that have the role &#8220;admin&#8221; - pretty neat, ah?</p>
+
+<p>There is a lot of built in services already available, for example, enabling chartbeat is just a few lines of config:</p>
+
+<pre><code>'chartbeat' =&gt; array(
+    'enabled' =&gt; Kohana::$environment === array(Kohana::PRODUCTION,
+    'config' =&gt; array('uid' =&gt; 'your key' , 'domain' =&gt; 'your domain'),
+),
+</code></pre>
+
+<p>And you don&#8217;t have to worry where the javascript will go, and not tracking people in dev environment, and generally makes you a more happy developer.</p>
+
+<p>But the main idea is that any service is easily converted to this system and you can create your own services for internal APIs and whatnot with the same flexibility of deployment. You just have to override the relevant abstract methods and you&#8217;re good to go.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[New open source libraries]]></title>
