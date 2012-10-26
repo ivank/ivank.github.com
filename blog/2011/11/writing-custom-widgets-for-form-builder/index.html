@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Writing Custom Widgets for Form Builder - Develop Simply</title>
+  <meta name="author" content="Ivan Kerin">
+
+  
+  <meta name="description" content="Normal Widget In the last post about the form builder for Kohana 3.2 I&#8217;ve showed some basic examples of using the library. It&#8217;s great for &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Develop Simply" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-26866049-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Develop Simply</a></h1>
+  
+    <h2>Ivan K's development musings</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ivank.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Writing Custom Widgets for Form Builder</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-27T02:29:00+02:00" pubdate data-updated="true">Nov 27<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Normal Widget</h2>
+
+<p>In the last post <a href="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/">about the form builder</a> for <a href="http://kohanaframework.org/">Kohana 3.2</a> I&#8217;ve showed some basic examples of using the library. It&#8217;s great for when you quickly want to build a form and be done with it, but what if you have something more specific in mind - for example, a widget to display a rich textarea. (using CKEditor)</p>
+
+<p>So here we go - in order to write a custom widget we first need to create a class to hold the widget itself (all widgets are just static methods in some a class). The class must start with Form_Widgets_. So we create one named Form_Widgets_Custom</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Form_Widgets_Custom</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">public</span> <span class="k">function</span> <span class="nf">richtextarea</span><span class="p">(</span><span class="nx">Form_Widget</span> <span class="nv">$data</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">attributes</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">&#39;data-type&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;rich&#39;</span><span class="p">));</span>
+</span><span class='line'>      <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">merge_as_data</span><span class="p">(</span><span class="nv">$data</span><span class="o">-&gt;</span><span class="na">options</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">return</span> <span class="nx">Form</span><span class="o">::</span><span class="na">textarea</span><span class="p">(</span><span class="nv">$data</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">(),</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">value</span><span class="p">(),</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">as_array</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&#8217;s a pretty simple widget from PHP&#8217;s perspective - we assign a custom attribute (to anchor our JS). Also - <code>$data-&gt;attribute()</code> is not just a simple associative array - it has some helper methods, and one of them is <code>-&gt;merge_as_data()</code> it will perform the same thing as the code above it - merge the array to itself, except it will prefix every key with &#8220;data-&#8221; so they become proper HTML5 attributes. So the JS, using jQuery will end up looking like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;textarea[data-type=rich]&#39;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">ckeditor</span><span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span><span class="nx">width</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">outerWidth</span><span class="p">(),</span> <span class="nx">height</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">outerHeight</span><span class="p">()</span> <span class="p">},</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">data</span><span class="p">()));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can call this custom widget in any form from now on like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;custom::richtextarea&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Multiple Fields Widget</h2>
+
+<p>I&#8217;ve had to implement a &#8220;location&#8221; widget, that would allow inputing an address field, showing you the actual location of the address in Google maps, and the ability to move the marker and set a different location for the same address, not the one provided by Google maps. This requires at least one more field, probably two (latitude and longitude).</p>
+
+<p>Each widget takes a <code>Form_Widget</code> class as an argument which has all the information required to build a widget (name, value, attributes, etc.) But that&#8217;s for only one field, what if we want some more fields in the same widget - as it happens you can do that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;custom::location&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;lat&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;lon&#39;</span><span class="p">))</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>$data-&gt;name()</code>, <code>$data-&gt;value()</code> return the name and value of the first field respectfully - but if you have multiple fields, you can get them with <code>$data-&gt;items('lat')-&gt;name()</code>. So this will work like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Form_Widgets_Custom</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">public</span> <span class="k">function</span> <span class="nf">location</span><span class="p">(</span><span class="nx">Form_Widget</span> <span class="nv">$data</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">attributes</span><span class="p">(</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;data-location&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;location&#39;</span><span class="p">));</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="nv">$html</span> <span class="o">=</span> <span class="nx">Form</span><span class="o">::</span><span class="na">input</span><span class="p">(</span><span class="nv">$data</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">(),</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">value</span><span class="p">(),</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">attributes</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">as_array</span><span class="p">());</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">items</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">)</span> <span class="k">AND</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">items</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">)</span> <span class="p">)</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="nv">$html</span> <span class="o">.=</span> <span class="nx">Form</span><span class="o">::</span><span class="na">hidden</span><span class="p">(</span><span class="nv">$data</span><span class="o">-&gt;</span><span class="na">items</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">(),</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">items</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">value</span><span class="p">(),</span> <span class="k">array</span><span class="p">(</span><span class="s2">&quot;data-type&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;location-lat&#39;</span><span class="p">));</span>
+</span><span class='line'>          <span class="nv">$html</span> <span class="o">.=</span> <span class="nx">Form</span><span class="o">::</span><span class="na">hidden</span><span class="p">(</span><span class="nv">$data</span><span class="o">-&gt;</span><span class="na">items</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">(),</span> <span class="nv">$data</span><span class="o">-&gt;</span><span class="na">items</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">value</span><span class="p">(),</span> <span class="k">array</span><span class="p">(</span><span class="s2">&quot;data-type&quot;</span> <span class="o">=&gt;</span> <span class="s1">&#39;location-lon&#39;</span><span class="p">));</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nv">$html</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>    
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We set the attributes of the main input field with the <code>$data-&gt;attribute()</code>. There are 2 main groups of methods on the Form_Widget passed to our method:</p>
+
+<ol>
+<li>Field Related - those are <code>-&gt;name()</code>, <code>-&gt;value()</code>, <code>-&gt;field_name()</code>, <code>-&gt;label()</code>, <code>-&gt;id()</code> and <code>-&gt;errors()</code>. All of those return values related to first field, but if there are multiple fields, you can access them through the <code>-&gt;items()</code> and <code>-&gt;item(&lt;name&gt;)</code> methods - each item has all those methods too.</li>
+<li>Everything else - <code>-&gt;attributes()</code>, <code>-&gt;options()</code>, <code>-&gt;required()</code> - those operate on the widget itself.</li>
+</ol>
+
+
+<h2>Widget Slots</h2>
+
+<p>If you want to get really funky with your widget you can tap into the &#8220;slots&#8221; functionality - you see, the return of the widget method is passed into the :field slot inside the template, but you can modify that directly, set other slots, or even not set a :field slot at all</p>
+
+<p>A simple example of how this all works is this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Form_Widgets_Custom</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">public</span> <span class="k">function</span> <span class="nf">checkbox</span><span class="p">(</span><span class="nx">Form_Widget</span> <span class="nv">$data</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>        
+</span><span class='line'>      <span class="k">return</span> <span class="nx">Form_Widgets</span><span class="o">::</span><span class="na">checkbox</span><span class="p">(</span><span class="nv">$data</span><span class="o">-&gt;</span><span class="na">swap_slots</span><span class="p">(</span><span class="s2">&quot;:label&quot;</span><span class="p">,</span> <span class="s2">&quot;:field&quot;</span><span class="p">));</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With this we use the default checkbox widget, but swap the slots of the field and label in the template (so that the input appears before the label). You can modify the template directly through <code>$data-&gt;template(&lt;new template&gt;)</code> and you can set slots, default ones or your own with <code>$data-&gt;slots('name', 'slot content')</code></p>
+
+<h2>Custom Form Builder</h2>
+
+<p>Alright so you&#8217;ve made a couple of custom widgets, but what you want is a custom style to all your widgets, in that case you can write a custom form builder class that sets the desired parameters to all the widgets it creates. Here&#8217;s an example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Form_Builder_Jelly_Admin</span> <span class="k">extends</span> <span class="nx">Form_Builder_Jelly</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">row</span><span class="p">(</span><span class="nv">$callback</span><span class="p">,</span> <span class="nv">$name</span><span class="p">,</span> <span class="nv">$options</span> <span class="o">=</span> <span class="k">null</span><span class="p">,</span> <span class="nv">$attributes</span> <span class="o">=</span> <span class="k">null</span> <span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$help</span> <span class="o">=</span> <span class="nx">Arr</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="nv">$options</span><span class="p">,</span> <span class="s1">&#39;help&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nv">$field</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">field</span><span class="p">(</span><span class="nv">$callback</span><span class="p">,</span> <span class="nv">$name</span><span class="p">,</span> <span class="nv">$options</span><span class="p">,</span> <span class="nv">$attributes</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nv">$errors</span> <span class="o">=</span> <span class="nb">join</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">,</span> <span class="nx">Arr</span><span class="o">::</span><span class="na">flatten</span><span class="p">((</span><span class="k">array</span><span class="p">)</span> <span class="nv">$field</span><span class="o">-&gt;</span><span class="na">errors</span><span class="p">()));</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">return</span> <span class="nv">$field</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">slots</span><span class="p">(</span><span class="s2">&quot;:errors&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;span class=</span><span class="se">\&quot;</span><span class="s2">help-inline</span><span class="se">\&quot;</span><span class="s2">&gt;</span><span class="si">{</span><span class="nv">$errors</span><span class="si">}</span><span class="s2">&lt;/span&gt;&quot;</span><span class="p">,</span> <span class="k">TRUE</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">slots</span><span class="p">(</span><span class="s2">&quot;:with-errors&quot;</span><span class="p">,</span> <span class="nv">$field</span><span class="o">-&gt;</span><span class="na">errors</span><span class="p">()</span> <span class="o">?</span> <span class="s1">&#39;error&#39;</span> <span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="k">TRUE</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">slots</span><span class="p">(</span><span class="s2">&quot;:help&quot;</span><span class="p">,</span> <span class="nv">$help</span> <span class="o">?</span> <span class="s2">&quot;&lt;span class=</span><span class="se">\&quot;</span><span class="s2">help-block</span><span class="se">\&quot;</span><span class="s2">&gt;</span><span class="si">$help</span><span class="s2">&lt;/span&gt;&quot;</span> <span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="k">TRUE</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">render</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">//Set some custom parameters in the widget object, used by &quot;row&quot; and &quot;field&quot; methods</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">widget</span><span class="p">(</span><span class="nv">$name</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">parent</span><span class="o">::</span><span class="na">widget</span><span class="p">(</span><span class="nv">$name</span><span class="p">)</span>
+</span><span class='line'>          <span class="o">-&gt;</span><span class="na">template</span><span class="p">(</span><span class="s1">&#39;&lt;div class=&quot;clearfix :name-field :type-field :with-errors&quot;&gt;:label&lt;div class=&quot;input&quot;&gt;:field:errors:help&lt;/div&gt;&lt;/div&gt;&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So now you have a custom &#8220;help&#8221; option that every widget has, as well as custom error message and a custom template.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Ivan Kerin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-27T02:29:00+02:00" pubdate data-updated="true">Nov 27<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/form-builder/'>form-builder</a>, <a class='category' href='/blog/categories/kohana-/'>kohana,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder/" data-via="" data-counturl="http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/11/introducing-kohana-form-builder/" title="Previous Post: Introducing Kohana Form Builder">&laquo; Introducing Kohana Form Builder</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/10/jamming-to-the-future/" title="Next Post: Jamming to the future">Jamming to the future &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/new-opensoure-libraries/">New open source libraries</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/jamming-to-the-future/">Jamming to the future</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/big-update-to-migration/">Big update to migration</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/openbuildings">@openbuildings</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'openbuildings',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/ikerin@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Ivan Kerin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

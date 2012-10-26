@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Timestamped Migrations - Develop Simply</title>
+  <meta name="author" content="Ivan Kerin">
+
+  
+  <meta name="description" content="All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ivank.github.com/blog/2011/11/timestamped-migrations/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Develop Simply" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-26866049-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Develop Simply</a></h1>
+  
+    <h2>Ivan K's development musings</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ivank.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Timestamped Migrations</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-07T22:51:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the tools for that for <a href="http://kohanaframework.org/">Kohana 3</a> are of course &#8230; you got it - lacking. There is <a href="https://github.com/jmhobbs/kohana-3-migrations">Kohana-3-migraitons</a> - but versioned migrations work only for a single developer - if that&#8217;s your situation - I envy you, I really do - so much less headache. But when you try to collaborate database changes, especially with git/svn managing your files - you soon start to say very inappropriate words, very very loudly. So I went on and rewrote null77&#8217;s excellent module <a href="http://code.google.com/p/kohana-migrations/">kohana-migrations</a> for Kohana 3 - <a href="https://github.com/OpenBuildings/timestamped-migrations">Timestamped Migrations</a>, but with some more sugar.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git clone git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git submodule git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations
+</span><span class='line'>git submodule update --init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So now your migrations will look like</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>1319717756_initial.php
+</span><span class='line'>1319717856_migrate_users_and_roles.php
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Might seem a bit too verbose, but it&#8217;s a godsend when you have more than one person on a project - you can just drop a migration file and have it execute in just the right place and order - delightfully convenient.</p>
+
+<p>I personally detest web interfaces for those kind of tasks - exposing system tools to a webserver seem &#8230; unclean, so I&#8217;ve ditched the controllers and views, and implemented simple CLI for this, using <a href="https://github.com/OpenBuildings/kohana-cli">Kohana-cli</a> and mimicking rails&#8217; syntax as much as possible. Check it out.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>kohana db:version
+</span><span class='line'>kohana db:migrate
+</span><span class='line'>kohana db:migrate:up
+</span><span class='line'>kohana db:migrate:down --step<span class="o">=</span>4
+</span><span class='line'>kohana db:migrate:redo --version<span class="o">=</span>1319717756
+</span><span class='line'>kohana db:rollback
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can read all about it at the github <a href="https://github.com/OpenBuildings/timestamped-migrations/blob/master/README.md">README file</a>. Enjoy.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Ivan Kerin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-07T22:51:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/kohana/'>Kohana</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2011/11/timestamped-migrations/" data-via="" data-counturl="http://ivank.github.com/blog/2011/11/timestamped-migrations/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/11/command-line-interfaces-rule/" title="Previous Post: Command Line Interfaces Rule">&laquo; Command Line Interfaces Rule</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/11/big-update-to-migration/" title="Next Post: Big update to migration">Big update to migration &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/new-opensoure-libraries/">New open source libraries</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/jamming-to-the-future/">Jamming to the future</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/big-update-to-migration/">Big update to migration</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/openbuildings">@openbuildings</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'openbuildings',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/ikerin@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Ivan Kerin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

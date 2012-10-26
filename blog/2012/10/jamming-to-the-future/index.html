@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Jamming to the future - Develop Simply</title>
+  <meta name="author" content="Ivan Kerin">
+
+  
+  <meta name="description" content="It&#8217;s been a long time since my last publication, but I&#8217;ve not been gone to a deserted island or anything, just working quietly in the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ivank.github.com/blog/2012/10/jamming-to-the-future/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Develop Simply" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-26866049-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Develop Simply</a></h1>
+  
+    <h2>Ivan K's development musings</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ivank.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Jamming to the Future</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-26T12:55:00+03:00" pubdate data-updated="true">Oct 26<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>It&#8217;s been a long time since my last publication, but I&#8217;ve not been gone to a deserted island or anything, just working quietly in the shadows. And I think I am at last ready to come out and introduce what I and the Clippings team have been working on for so long. But first a very quick history tour.</p>
+
+<p>The Kohana framework is really great most of the time - great request handling, caching, module management, database query building etc., where I find it somewhat lacking (and I mean like What-the-hell-guys-put-your-shit-together type) - is the ORM. Yes it works for most of the basic use cases but its only a very thin layer over the Database builder. By the time we started the project there was <a href="http://jelly.jonathan-geiger.com/">Jelly</a> - a really inspired little ORM that promised a lot and did it with very little clean and concise code. I immoderately fell in love and started using it instead the built in ORM - and it was working great, up until the point I realized that it was a &#8220;dead&#8221; project and nobody actually added new stuff to it. No problem - I like to extend things - so little by little small pieces of code were added to the project by us and at one point I just decided - this is not Jelly anymore! And so we now have a new feature rich library for handling database persistence - <a href="https://github.com/OpenBuildings/jam">Jam</a>.</p>
+
+<p>While the Jam library is a spiritual successor of Jelly, the internals are quite different because of the loads of bundled up functionality that had to be added. Because it was developed over time over the Jelly code base, some of its design don&#8217;t fit particularly well and will probably be replaced by a more consistent interface in the near future. And I had to remove the eager loading functionality (load_with()), which in my tests performed worse than simply loading all the models anyway, however, you gain quite a lot in return - stuff like:</p>
+
+<ul>
+<li>Lazy loading of collections - the query is executed at the last possible moment so you can easily cache it in your views.</li>
+<li>Build in validation in the model, Active record style - no more unhanded exceptions and weird error message file locations, and validation rules are handled much more developer friendly</li>
+<li>Polymorphism - polymorphic &#8216;belongs to&#8217; and &#8216;has many&#8217;</li>
+<li>Uploading files to different back ends transparently (local, Rackspace, FTP), and by different means (Ajax uploads, URLs)</li>
+<li>Built in behaviors - Paranoid, Sluggable, Nested, Sortable, Uploadable</li>
+<li>HTML Form builder with automatic errors integration and nested associations</li>
+</ul>
+
+
+<p>And these are just off the top of my head - there are many many small additions and fixes, and most importantly tons of documentation for the existing functionality.</p>
+
+<p>So take a look at <a href="https://github.com/OpenBuildings/jam">Jam</a> (and the corresponding <a href="https://github.com/OpenBuildings/jam-auth">Jam Auth</a>) and tell me what you think.</p>
+
+<hr />
+
+<p>P.S. Kudos to Jonathan Geiger and all of the maintainers of the jelly project - it really is a great inspiration. I tried to hold the spirit of jelly true, but with all the new functionality that had to be added I sort of abandoned the idea of &#8220;keeping it really small&#8221; and went with &#8220;add a lot of useful features&#8221; approach.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Ivan Kerin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-26T12:55:00+03:00" pubdate data-updated="true">Oct 26<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/jam/'>jam</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2012/10/jamming-to-the-future/" data-via="" data-counturl="http://ivank.github.com/blog/2012/10/jamming-to-the-future/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/11/writing-custom-widgets-for-form-builder/" title="Previous Post: Writing Custom Widgets for Form Builder">&laquo; Writing Custom Widgets for Form Builder</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/10/new-opensoure-libraries/" title="Next Post: New open source libraries">New open source libraries &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/new-opensoure-libraries/">New open source libraries</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/jamming-to-the-future/">Jamming to the future</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/big-update-to-migration/">Big update to migration</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/openbuildings">@openbuildings</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'openbuildings',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/ikerin@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Ivan Kerin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

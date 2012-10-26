@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: kohana, | Develop Simply]]></title>
+  <link href="http://ivank.github.com/blog/categories/kohana-/atom.xml" rel="self"/>
+  <link href="http://ivank.github.com/"/>
+  <updated>2012-10-26T15:49:44+03:00</updated>
+  <id>http://ivank.github.com/</id>
+  <author>
+    <name><![CDATA[Ivan Kerin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Writing Custom Widgets for Form Builder]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder/"/>
+    <updated>2011-11-27T02:29:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder</id>
+    <content type="html"><![CDATA[<h2>Normal Widget</h2>
+
+<p>In the last post <a href="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/">about the form builder</a> for <a href="http://kohanaframework.org/">Kohana 3.2</a> I've showed some basic examples of using the library. It's great for when you quickly want to build a form and be done with it, but what if you have something more specific in mind - for example, a widget to display a rich textarea. (using CKEditor)</p>
+
+<p>So here we go - in order to write a custom widget we first need to create a class to hold the widget itself (all widgets are just static methods in some a class). The class must start with Form_Widgets_. So we create one named Form_Widgets_Custom</p>
+
+<p>```php
+&lt;?php
+class Form_Widgets_Custom
+{</p>
+
+<pre><code>static public function richtextarea(Form_Widget $data)
+{
+    $data-&gt;attributes(array('data-type' =&gt; 'rich'));
+    $data-&gt;attributes()-&gt;merge_as_data($data-&gt;options("config"));
+
+    return Form::textarea($data-&gt;name(), $data-&gt;value(), $data-&gt;attributes()-&gt;as_array());
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>That's a pretty simple widget from PHP's perspective - we assign a custom attribute (to anchor our JS). Also - <code>$data-&gt;attribute()</code> is not just a simple associative array - it has some helper methods, and one of them is <code>-&gt;merge_as_data()</code> it will perform the same thing as the code above it - merge the array to itself, except it will prefix every key with "data-" so they become proper HTML5 attributes. So the JS, using jQuery will end up looking like this:</p>
+
+<p>```js
+$('textarea[data-type=rich]').each(function(){</p>
+
+<pre><code>$(this).ckeditor($.extend({width: $(this).outerWidth(), height: $(this).outerHeight() }, $(this).data()));
+</code></pre>
+
+<p>});
+```
+You can call this custom widget in any form from now on like this:</p>
+
+<p><code>php
+&lt;?php echo $form-&gt;row('custom::richtextarea', 'description') ?&gt;
+</code></p>
+
+<h2>Multiple Fields Widget</h2>
+
+<p>I've had to implement a "location" widget, that would allow inputing an address field, showing you the actual location of the address in Google maps, and the ability to move the marker and set a different location for the same address, not the one provided by Google maps. This requires at least one more field, probably two (latitude and longitude).</p>
+
+<p>Each widget takes a <code>Form_Widget</code> class as an argument which has all the information required to build a widget (name, value, attributes, etc.) But that's for only one field, what if we want some more fields in the same widget - as it happens you can do that:</p>
+
+<p><code>php
+&lt;?php echo $form-&gt;row('custom::location', array('location', 'lat' =&gt; 'lat', 'lon' =&gt; 'lon')) ?&gt;
+</code></p>
+
+<p><code>$data-&gt;name()</code>, <code>$data-&gt;value()</code> return the name and value of the first field respectfully - but if you have multiple fields, you can get them with <code>$data-&gt;items('lat')-&gt;name()</code>. So this will work like this:</p>
+
+<p>```php
+&lt;?php
+class Form_Widgets_Custom
+{</p>
+
+<pre><code>static public function location(Form_Widget $data)
+{
+    $data-&gt;attributes( array('data-location' =&gt; 'location'));
+
+    $html = Form::input($data-&gt;name(), $data-&gt;value(), $data-&gt;attributes()-&gt;as_array());
+
+    if( $data-&gt;items('lat') AND $data-&gt;items('lon') )
+    {
+        $html .= Form::hidden($data-&gt;items('lat')-&gt;name(), $data-&gt;items('lat')-&gt;value(), array("data-type" =&gt; 'location-lat'));
+        $html .= Form::hidden($data-&gt;items('lon')-&gt;name(), $data-&gt;items('lon')-&gt;value(), array("data-type" =&gt; 'location-lon'));
+    }
+    return $html;
+}   
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>We set the attributes of the main input field with the <code>$data-&gt;attribute()</code>. There are 2 main groups of methods on the Form_Widget passed to our method:</p>
+
+<ol>
+<li>Field Related - those are <code>-&gt;name()</code>, <code>-&gt;value()</code>, <code>-&gt;field_name()</code>, <code>-&gt;label()</code>, <code>-&gt;id()</code> and <code>-&gt;errors()</code>. All of those return values related to first field, but if there are multiple fields, you can access them through the <code>-&gt;items()</code> and <code>-&gt;item(&lt;name&gt;)</code> methods - each item has all those methods too.</li>
+<li>Everything else - <code>-&gt;attributes()</code>, <code>-&gt;options()</code>, <code>-&gt;required()</code> - those operate on the widget itself.</li>
+</ol>
+
+
+<h2>Widget Slots</h2>
+
+<p>If you want to get really funky with your widget you can tap into the "slots" functionality - you see, the return of the widget method is passed into the :field slot inside the template, but you can modify that directly, set other slots, or even not set a :field slot at all</p>
+
+<p>A simple example of how this all works is this:</p>
+
+<p>```php
+&lt;?php
+class Form_Widgets_Custom
+{</p>
+
+<pre><code>static public function checkbox(Form_Widget $data)
+{       
+    return Form_Widgets::checkbox($data-&gt;swap_slots(":label", ":field"));
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>With this we use the default checkbox widget, but swap the slots of the field and label in the template (so that the input appears before the label). You can modify the template directly through <code>$data-&gt;template(&lt;new template&gt;)</code> and you can set slots, default ones or your own with <code>$data-&gt;slots('name', 'slot content')</code></p>
+
+<h2>Custom Form Builder</h2>
+
+<p>Alright so you've made a couple of custom widgets, but what you want is a custom style to all your widgets, in that case you can write a custom form builder class that sets the desired parameters to all the widgets it creates. Here's an example:</p>
+
+<p>```php
+&lt;?php
+class Form_Builder_Jelly_Admin extends Form_Builder_Jelly
+{</p>
+
+<pre><code>public function row($callback, $name, $options = null, $attributes = null )
+{
+    $help = Arr::get($options, 'help');
+
+    $field = $this-&gt;field($callback, $name, $options, $attributes);
+
+    $errors = join(', ', Arr::flatten((array) $field-&gt;errors()));
+
+    return $field
+        -&gt;slots(":errors", "&lt;span class=\"help-inline\"&gt;{$errors}&lt;/span&gt;", TRUE)
+        -&gt;slots(":with-errors", $field-&gt;errors() ? 'error' : '', TRUE)
+        -&gt;slots(":help", $help ? "&lt;span class=\"help-block\"&gt;$help&lt;/span&gt;" : '', TRUE)
+        -&gt;render();
+}
+
+//Set some custom parameters in the widget object, used by "row" and "field" methods
+public function widget($name)
+{
+    return parent::widget($name)
+        -&gt;template('&lt;div class="clearfix :name-field :type-field :with-errors"&gt;:label&lt;div class="input"&gt;:field:errors:help&lt;/div&gt;&lt;/div&gt;');
+}
+</code></pre>
+
+<p>}
+?>
+```
+So now you have a custom "help" option that every widget has, as well as custom error message and a custom template.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Introducing Kohana Form Builder]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/"/>
+    <updated>2011-11-26T18:53:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder</id>
+    <content type="html"><![CDATA[<p>I have a history with forms - all kinds of them - <em>Symfony Forms</em>, <em>Cake Forms</em>, <em>Kohana Forms</em>, <em>Rails Forms</em> - you name it. And every form builder had something missing - some feature that I had to build, some misconception about what is really desired of the builder. Some got it better than others - for example I am a big fan of rails form helper thingie. It has a ease-of-use feel to it that I hadn't encountered elsewhere - but it does have some missing features that I always ended up implementing myself. Symfony on the other hand has quite a lot of features but it feels so complicated and cumbersome to use that I often don't even bother. So I needed a form builder for <a href="http://kohanaframework.org/">Kohana 3.2</a> and decided to build one that had everything I dreamed of having - of course I ended up with a lot of compromises - but the result so far looks quite satisfying - <a href="https://github.com/OpenBuildings/form-builder">form-builder</a></p>
+
+<h2>Requirements</h2>
+
+<p>I've put a lot of effort to make writing forms as effortless as possible. There are some basic requirements that I want out of the form builder module:</p>
+
+<ol>
+<li><strong>Configurability</strong> - every project's forms have different requirements of "when to show what" - this had to be implemented in such a way that you would be able to go straight down to HTML and basic PHP to customize your forms, preferably in a repeatable way.</li>
+<li><strong>Jelly integration</strong> - you would probably have a lot of logic for validation and fields themselves already - I wanted to tap into this instead of duplicating it elsewhere.</li>
+<li><strong>Stand on their own</strong> - but sometimes you do want to build forms without a specific jelly model attached to it, maybe with just a Validation object, or no object at all</li>
+<li><strong>Nested forms</strong> - you might say that this is too specific and rarely used - but in every single project I dealt with there had to be at least one nested form - and it's such a basic concept that I did want it to work right out of the box</li>
+<li><strong>Extensibility</strong> - you must be able to write new widgets easily - with different properties - multiple fields, with required or optional parameters and to have access to the whole model</li>
+<li><strong>Ease of writing</strong> - writing HTML forms in your templates should be easy and concise - period.</li>
+</ol>
+
+
+<p>I've tried to address all of those properly and if I've strayed off this path I would be happy to receive suggestions how to get back on track :)</p>
+
+<h2>Example</h2>
+
+<p>So here's an actual example of a form:</p>
+
+<p>The Controller:
+```php
+&lt;?php
+class Controller_Users extends Controller_Template
+{</p>
+
+<pre><code>public function action_edit()
+{
+    //Load 
+    $user = Jelly::factory('user', $this-&gt;request-&gt;param('id'));
+    $form = Form_Builder::factory($user, $_POST);
+
+    if($this-&gt;request-&gt;method() == Request::POST AND $form-&gt;check())
+    {
+        $form-&gt;save();
+        $this-&gt;redirect("/success");
+    }
+    $this-&gt;template-&gt;content = View::factory('form', array('form' =&gt; $form));
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>And the view:
+```php</p>
+
+<p>&lt;?php echo Form::open('/edit') ?></p>
+
+<pre><code>&lt;fieldset&gt;
+&lt;legend&gt;Basic Info&lt;/legend&gt;
+    &lt;?php echo $form-&gt;row('input', 'email', null, array('type' =&gt; 'email')) ?&gt;
+    &lt;?php echo $form-&gt;row('input', 'first_name') ?&gt;
+    &lt;?php echo $form-&gt;row('input', 'last_name') ?&gt;
+    &lt;?php echo $form-&gt;row('input', 'password') ?&gt;
+    &lt;?php echo $form-&gt;row('checkboxes', 'roles', array('choices' =&gt; Jelly::query('role')-&gt;select())) ?&gt;
+&lt;/legend&gt;
+
+&lt;fieldset&gt;
+&lt;legend&gt;About&lt;/legend&gt;
+    &lt;?php echo $form-&gt;row('checkbox', 'receive_newsletter', null, array('class' =&gt; 'span8')) ?&gt;
+    &lt;?php echo $form-&gt;row('textarea', 'description', null, array('class' =&gt; 'span12')) ?&gt;
+&lt;/fieldset&gt;
+
+&lt;fieldset&gt;
+&lt;legend&gt;Contacts&lt;/legend&gt;
+    &lt;?php echo $form-&gt;row('input', 'website') ?&gt;
+    &lt;?php echo $form-&gt;row('input', 'twitter') ?&gt;
+    &lt;?php echo $form-&gt;row('input', 'facebook') ?&gt;
+&lt;/fieldset&gt;
+</code></pre>
+
+<p>```</p>
+
+<p>That form is sufficient to view and edit the user's properties, displaying errors on fail when appropriate and it's all quite self-explanatory - the only concept different from the already established ones in Kohana and Jelly is the concept of "widgets" - you basically have functions that construct some kind of input tags - in this example they are <code>input</code>, <code>textarea</code>, <code>checkbox</code> and <code>checkboxes</code>. All of this is explained in the README</p>
+
+<p>The icing on the cake is that it reads Jelly Model's rules and places html5 form validation whenever possible.</p>
+]]></content>
+  </entry>
+  
+</feed>

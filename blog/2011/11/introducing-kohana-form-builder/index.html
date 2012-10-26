@@ -1,0 +1,405 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Introducing Kohana Form Builder - Develop Simply</title>
+  <meta name="author" content="Ivan Kerin">
+
+  
+  <meta name="description" content="I have a history with forms - all kinds of them - Symfony Forms, Cake Forms, Kohana Forms, Rails Forms - you name it. And every form builder had &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Develop Simply" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-26866049-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Develop Simply</a></h1>
+  
+    <h2>Ivan K's development musings</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ivank.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Introducing Kohana Form Builder</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-26T18:53:00+02:00" pubdate data-updated="true">Nov 26<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I have a history with forms - all kinds of them - <em>Symfony Forms</em>, <em>Cake Forms</em>, <em>Kohana Forms</em>, <em>Rails Forms</em> - you name it. And every form builder had something missing - some feature that I had to build, some misconception about what is really desired of the builder. Some got it better than others - for example I am a big fan of rails form helper thingie. It has a ease-of-use feel to it that I hadn&#8217;t encountered elsewhere - but it does have some missing features that I always ended up implementing myself. Symfony on the other hand has quite a lot of features but it feels so complicated and cumbersome to use that I often don&#8217;t even bother. So I needed a form builder for <a href="http://kohanaframework.org/">Kohana 3.2</a> and decided to build one that had everything I dreamed of having - of course I ended up with a lot of compromises - but the result so far looks quite satisfying - <a href="https://github.com/OpenBuildings/form-builder">form-builder</a></p>
+
+<h2>Requirements</h2>
+
+<p>I&#8217;ve put a lot of effort to make writing forms as effortless as possible. There are some basic requirements that I want out of the form builder module:</p>
+
+<ol>
+<li><strong>Configurability</strong> - every project&#8217;s forms have different requirements of &#8220;when to show what&#8221; - this had to be implemented in such a way that you would be able to go straight down to HTML and basic PHP to customize your forms, preferably in a repeatable way.</li>
+<li><strong>Jelly integration</strong> - you would probably have a lot of logic for validation and fields themselves already - I wanted to tap into this instead of duplicating it elsewhere.</li>
+<li><strong>Stand on their own</strong> - but sometimes you do want to build forms without a specific jelly model attached to it, maybe with just a Validation object, or no object at all</li>
+<li><strong>Nested forms</strong> - you might say that this is too specific and rarely used - but in every single project I dealt with there had to be at least one nested form - and it&#8217;s such a basic concept that I did want it to work right out of the box</li>
+<li><strong>Extensibility</strong> - you must be able to write new widgets easily - with different properties - multiple fields, with required or optional parameters and to have access to the whole model</li>
+<li><strong>Ease of writing</strong> - writing HTML forms in your templates should be easy and concise - period.</li>
+</ol>
+
+
+<p>I&#8217;ve tried to address all of those properly and if I&#8217;ve strayed off this path I would be happy to receive suggestions how to get back on track :)</p>
+
+<h2>Example</h2>
+
+<p>So here&#8217;s an actual example of a form:</p>
+
+<p>The Controller:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Controller_Users</span> <span class="k">extends</span> <span class="nx">Controller_Template</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">action_edit</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="c1">//Load </span>
+</span><span class='line'>      <span class="nv">$user</span> <span class="o">=</span> <span class="nx">Jelly</span><span class="o">::</span><span class="na">factory</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">param</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">));</span>
+</span><span class='line'>      <span class="nv">$form</span> <span class="o">=</span> <span class="nx">Form_Builder</span><span class="o">::</span><span class="na">factory</span><span class="p">(</span><span class="nv">$user</span><span class="p">,</span> <span class="nv">$_POST</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">request</span><span class="o">-&gt;</span><span class="na">method</span><span class="p">()</span> <span class="o">==</span> <span class="nx">Request</span><span class="o">::</span><span class="na">POST</span> <span class="k">AND</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">check</span><span class="p">())</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">save</span><span class="p">();</span>
+</span><span class='line'>          <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">redirect</span><span class="p">(</span><span class="s2">&quot;/success&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">template</span><span class="o">-&gt;</span><span class="na">content</span> <span class="o">=</span> <span class="nx">View</span><span class="o">::</span><span class="na">factory</span><span class="p">(</span><span class="s1">&#39;form&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;form&#39;</span> <span class="o">=&gt;</span> <span class="nv">$form</span><span class="p">));</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And the view:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nx">Form</span><span class="o">::</span><span class="na">open</span><span class="p">(</span><span class="s1">&#39;/edit&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;fieldset&gt;</span>
+</span><span class='line'><span class="x">  &lt;legend&gt;Basic Info&lt;/legend&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;type&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;email&#39;</span><span class="p">))</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;first_name&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;last_name&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">,</span> <span class="s1">&#39;roles&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;choices&#39;</span> <span class="o">=&gt;</span> <span class="nx">Jelly</span><span class="o">::</span><span class="na">query</span><span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">select</span><span class="p">()))</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;/legend&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">  &lt;fieldset&gt;</span>
+</span><span class='line'><span class="x">  &lt;legend&gt;About&lt;/legend&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;checkbox&#39;</span><span class="p">,</span> <span class="s1">&#39;receive_newsletter&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;span8&#39;</span><span class="p">))</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;textarea&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;class&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;span12&#39;</span><span class="p">))</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;/fieldset&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">  &lt;fieldset&gt;</span>
+</span><span class='line'><span class="x">  &lt;legend&gt;Contacts&lt;/legend&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;website&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;twitter&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$form</span><span class="o">-&gt;</span><span class="na">row</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;facebook&#39;</span><span class="p">)</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;/fieldset&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That form is sufficient to view and edit the user&#8217;s properties, displaying errors on fail when appropriate and it&#8217;s all quite self-explanatory - the only concept different from the already established ones in Kohana and Jelly is the concept of &#8220;widgets&#8221; - you basically have functions that construct some kind of input tags - in this example they are <code>input</code>, <code>textarea</code>, <code>checkbox</code> and <code>checkboxes</code>. All of this is explained in the README</p>
+
+<p>The icing on the cake is that it reads Jelly Model&#8217;s rules and places html5 form validation whenever possible.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Ivan Kerin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-26T18:53:00+02:00" pubdate data-updated="true">Nov 26<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/form-builder/'>form-builder</a>, <a class='category' href='/blog/categories/kohana-/'>kohana,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/" data-via="" data-counturl="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/11/big-update-to-migration/" title="Previous Post: Big update to migration">&laquo; Big update to migration</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/11/writing-custom-widgets-for-form-builder/" title="Next Post: Writing Custom Widgets for Form Builder">Writing Custom Widgets for Form Builder &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/new-opensoure-libraries/">New open source libraries</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/jamming-to-the-future/">Jamming to the future</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/big-update-to-migration/">Big update to migration</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/openbuildings">@openbuildings</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'openbuildings',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/ikerin@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Ivan Kerin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

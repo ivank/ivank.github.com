@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Migrations | Develop Simply]]></title>
+  <link href="http://ivank.github.com/blog/categories/migrations/atom.xml" rel="self"/>
+  <link href="http://ivank.github.com/"/>
+  <updated>2012-10-26T15:49:44+03:00</updated>
+  <id>http://ivank.github.com/</id>
+  <author>
+    <name><![CDATA[Ivan Kerin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Big update to migration]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/big-update-to-migration/"/>
+    <updated>2011-11-12T20:41:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/big-update-to-migration</id>
+    <content type="html"><![CDATA[<p>I was talking to the guys in the Kohana forum and the subject of "why should I use <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a> instead of minion's migrations" came up. Why indeed. So I decided to up the game a bit. Doing funky stuff like reading the changes from the local database and then syncing those back to production is a bit too fragile for my tastes, and at least with RDBMS i want to be <em>really</em> sure what's going to happen and what SQL queries will run, so I'm trying to reduce the "magic" as much as possible. There is however a lot of room for improvement, so what I ended up implementing was rails-style parsing of the filename to generate.</p>
+
+<h2>Migration Name Parsing</h2>
+
+<p>So imagine you want to make a migration like this:</p>
+
+<p><code>bash
+php kohana db:generate add_created_at_and_title_to_users
+</code></p>
+
+<p>Now, the tool should be savvy enough to read this filename and at least guess what you want to accomplish. And now it is. Behold:</p>
+
+<p>``` php
+&lt;?php
+class Add_Created_At_And_Title_To_Users extends Migration
+{</p>
+
+<pre><code>public function up()
+{
+    $this-&gt;add_column('users', 'created_at', 'string[255]');
+    $this-&gt;add_column('users', 'title', 'string[255]');
+}
+
+public function down()
+{
+    $this-&gt;remove_column('users', 'title');
+    $this-&gt;remove_column('users', 'created_at');
+}
+</code></pre>
+
+<p>}
+?>
+```
+It's not perfect, and you still have to tweak it a bit (change the type of created_at to a timestamp maybe) but it's a whole lot easier than having a blank migration file.</p>
+
+<p>But where this functionality really shines is when you want to drop some tables / columns.</p>
+
+<p><code>bash
+php kohana db:generate drop_table_roles
+</code></p>
+
+<p>``` php
+&lt;?php
+class Drop_Table_Roles extends Migration
+{</p>
+
+<pre><code>public function up()
+{
+    $this-&gt;drop_table('roles');
+}
+
+public function down()
+{
+    $this-&gt;create_table('roles', array( 
+        'name' =&gt; array( 'string[32]', "null" =&gt; false),
+        'description' =&gt; array( 'string[255]', "null" =&gt; false) 
+    ), array( 'engine' =&gt; 'InnoDB' )); 
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>You no longer have to go through the current database to write your own down statement, this data is accessible to the tool, so it does the work for you. Of course if the table does not exist it behaves like normal and you still have to write your own down statement.</p>
+
+<p>So Available patterns right now are:</p>
+
+<ul>
+<li>create_table_{table}</li>
+<li>drop_table_{table}</li>
+<li>add_{columns}_to_{table}</li>
+<li>remove_{columns}_from_{table}</li>
+<li>change_{columns}_in_{table}</li>
+<li>rename_table_{old_name}_to_{new_name}</li>
+<li>rename_{old_name}_to_{new_name}_in_{table_name}</li>
+</ul>
+
+
+<p>And you can write several {columns} if you separate them with <strong>_and_</strong> and you can also write several patterns, separated with <strong>_also_</strong> :</p>
+
+<p><code>bash
+php kohana db:generate drop_table_roles_also_add_name_and_title_to_authors
+</code></p>
+
+<p>It will order the statements in the up and down methods of the migration correctly too.</p>
+
+<h2>Dry Runs</h2>
+
+<p>There's now the ability to run the migrations and see what they do, without actually doing anything. Just add a --dry-run:</p>
+
+<p><code>bash
+php kohana db:migrate --dry-run
+1321124936 Add_Created_At_And_Title_To_Users : migrating up -- Dry Run
+-- [dry-run]add_column( users, created_at )
+   --&gt; 0.0000s
+-- [dry-run]add_column( users, title )
+   --&gt; 0.0000s
+1321124936 Add_Created_At_And_Title_To_Users : migrated (0.0001s)
+1321124960 Drop_Table_Roles_Also_Add_Name_And_Title_To_Authors : migrating up -- Dry Run
+-- [dry-run]drop_table( roles )
+   --&gt; 0.0000s
+-- [dry-run]add_column( authors, name )
+   --&gt; 0.0000s
+-- [dry-run]add_column( authors, title )
+   --&gt; 0.0000s
+1321124960 Drop_Table_Roles_Also_Add_Name_And_Title_To_Authors : migrated (0.0001s)
+</code>
+So no worries.</p>
+
+<h2>Execute SQL</h2>
+
+<p>After adding the dry run ability the need for a dedicated method to execute arbitrary SQL arose - so it will not execute on the dry run. You can now do:</p>
+
+<p><code>php
+$this-&gt;execute( "INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, 'login', 'Login privileges, granted after account confirmation')");
+</code></p>
+
+<p>And when you make a dry run this will not execute.</p>
+
+<h2>Bug Fixes</h2>
+
+<p>A nasty bug was fixed when when you specified already executed migration with --version it would execute all the others. Anyway, you should sleep happy now.</p>
+
+<p>Check out the code: <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Big update to migration - Develop Simply</title>
+  <meta name="author" content="Ivan Kerin">
+
+  
+  <meta name="description" content="I was talking to the guys in the Kohana forum and the subject of &#8220;why should I use timestamped-migrations instead of minion&#8217;s migrations &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ivank.github.com/blog/2011/11/big-update-to-migration/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Develop Simply" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-26866049-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Develop Simply</a></h1>
+  
+    <h2>Ivan K's development musings</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ivank.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Big Update to Migration</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-12T20:41:00+02:00" pubdate data-updated="true">Nov 12<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I was talking to the guys in the Kohana forum and the subject of &#8220;why should I use <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a> instead of minion&#8217;s migrations&#8221; came up. Why indeed. So I decided to up the game a bit. Doing funky stuff like reading the changes from the local database and then syncing those back to production is a bit too fragile for my tastes, and at least with RDBMS i want to be <em>really</em> sure what&#8217;s going to happen and what SQL queries will run, so I&#8217;m trying to reduce the &#8220;magic&#8221; as much as possible. There is however a lot of room for improvement, so what I ended up implementing was rails-style parsing of the filename to generate.</p>
+
+<h2>Migration Name Parsing</h2>
+
+<p>So imagine you want to make a migration like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>php kohana db:generate add_created_at_and_title_to_users
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Now, the tool should be savvy enough to read this filename and at least guess what you want to accomplish. And now it is. Behold:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Add_Created_At_And_Title_To_Users</span> <span class="k">extends</span> <span class="nx">Migration</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">add_column</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="s1">&#39;created_at&#39;</span><span class="p">,</span> <span class="s1">&#39;string[255]&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">add_column</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;string[255]&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">remove_column</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">remove_column</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="s1">&#39;created_at&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&#8217;s not perfect, and you still have to tweak it a bit (change the type of created_at to a timestamp maybe) but it&#8217;s a whole lot easier than having a blank migration file.</p>
+
+<p>But where this functionality really shines is when you want to drop some tables / columns.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>php kohana db:generate drop_table_roles
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="cp">&lt;?php</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Drop_Table_Roles</span> <span class="k">extends</span> <span class="nx">Migration</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">up</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">drop_table</span><span class="p">(</span><span class="s1">&#39;roles&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">public</span> <span class="k">function</span> <span class="nf">down</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">create_table</span><span class="p">(</span><span class="s1">&#39;roles&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span>
+</span><span class='line'>          <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span> <span class="s1">&#39;string[32]&#39;</span><span class="p">,</span> <span class="s2">&quot;null&quot;</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">),</span>
+</span><span class='line'>          <span class="s1">&#39;description&#39;</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span> <span class="s1">&#39;string[255]&#39;</span><span class="p">,</span> <span class="s2">&quot;null&quot;</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">),</span> <span class="k">array</span><span class="p">(</span> <span class="s1">&#39;engine&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;InnoDB&#39;</span> <span class="p">));</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You no longer have to go through the current database to write your own down statement, this data is accessible to the tool, so it does the work for you. Of course if the table does not exist it behaves like normal and you still have to write your own down statement.</p>
+
+<p>So Available patterns right now are:</p>
+
+<ul>
+<li>create_table_{table}</li>
+<li>drop_table_{table}</li>
+<li>add_{columns}_to_{table}</li>
+<li>remove_{columns}_from_{table}</li>
+<li>change_{columns}_in_{table}</li>
+<li>rename_table_{old_name}_to_{new_name}</li>
+<li>rename_{old_name}_to_{new_name}_in_{table_name}</li>
+</ul>
+
+
+<p>And you can write several {columns} if you separate them with <strong>_and_</strong> and you can also write several patterns, separated with <strong>_also_</strong> :</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>php kohana db:generate drop_table_roles_also_add_name_and_title_to_authors
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It will order the statements in the up and down methods of the migration correctly too.</p>
+
+<h2>Dry Runs</h2>
+
+<p>There&#8217;s now the ability to run the migrations and see what they do, without actually doing anything. Just add a &#8211;dry-run:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>php kohana db:migrate --dry-run
+</span><span class='line'>1321124936 Add_Created_At_And_Title_To_Users : migrating up -- Dry Run
+</span><span class='line'>-- <span class="o">[</span>dry-run<span class="o">]</span>add_column<span class="o">(</span> users, created_at <span class="o">)</span>
+</span><span class='line'>   --&gt; 0.0000s
+</span><span class='line'>-- <span class="o">[</span>dry-run<span class="o">]</span>add_column<span class="o">(</span> users, title <span class="o">)</span>
+</span><span class='line'>   --&gt; 0.0000s
+</span><span class='line'>1321124936 Add_Created_At_And_Title_To_Users : migrated <span class="o">(</span>0.0001s<span class="o">)</span>
+</span><span class='line'>1321124960 Drop_Table_Roles_Also_Add_Name_And_Title_To_Authors : migrating up -- Dry Run
+</span><span class='line'>-- <span class="o">[</span>dry-run<span class="o">]</span>drop_table<span class="o">(</span> roles <span class="o">)</span>
+</span><span class='line'>   --&gt; 0.0000s
+</span><span class='line'>-- <span class="o">[</span>dry-run<span class="o">]</span>add_column<span class="o">(</span> authors, name <span class="o">)</span>
+</span><span class='line'>   --&gt; 0.0000s
+</span><span class='line'>-- <span class="o">[</span>dry-run<span class="o">]</span>add_column<span class="o">(</span> authors, title <span class="o">)</span>
+</span><span class='line'>   --&gt; 0.0000s
+</span><span class='line'>1321124960 Drop_Table_Roles_Also_Add_Name_And_Title_To_Authors : migrated <span class="o">(</span>0.0001s<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So no worries.</p>
+
+<h2>Execute SQL</h2>
+
+<p>After adding the dry run ability the need for a dedicated method to execute arbitrary SQL arose - so it will not execute on the dry run. You can now do:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="x">$this-&gt;execute( &quot;INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, &#39;login&#39;, &#39;Login privileges, granted after account confirmation&#39;)&quot;);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And when you make a dry run this will not execute.</p>
+
+<h2>Bug Fixes</h2>
+
+<p>A nasty bug was fixed when when you specified already executed migration with &#8211;version it would execute all the others. Anyway, you should sleep happy now.</p>
+
+<p>Check out the code: <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a>.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Ivan Kerin</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-12T20:41:00+02:00" pubdate data-updated="true">Nov 12<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/kohana-/'>Kohana,</a>, <a class='category' href='/blog/categories/migrations/'>Migrations</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ivank.github.com/blog/2011/11/big-update-to-migration/" data-via="" data-counturl="http://ivank.github.com/blog/2011/11/big-update-to-migration/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/11/timestamped-migrations/" title="Previous Post: Timestamped Migrations">&laquo; Timestamped Migrations</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/11/introducing-kohana-form-builder/" title="Next Post: Introducing Kohana Form Builder">Introducing Kohana Form Builder &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/new-opensoure-libraries/">New open source libraries</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/jamming-to-the-future/">Jamming to the future</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/big-update-to-migration/">Big update to migration</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/openbuildings">@openbuildings</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'openbuildings',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/ikerin@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Ivan Kerin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

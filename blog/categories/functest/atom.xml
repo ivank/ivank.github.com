@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: functest | Develop Simply]]></title>
+  <link href="http://ivank.github.com/blog/categories/functest/atom.xml" rel="self"/>
+  <link href="http://ivank.github.com/"/>
+  <updated>2012-10-26T15:49:44+03:00</updated>
+  <id>http://ivank.github.com/</id>
+  <author>
+    <name><![CDATA[Ivan Kerin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[New open source libraries]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/new-opensoure-libraries/"/>
+    <updated>2012-10-26T14:55:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/new-opensoure-libraries</id>
+    <content type="html"><![CDATA[<p>I've always been a believer that in order to write first class code, one has to write it as if they will be released in the wild - with all the consistency, documentation and general bad-ass-ness that it requires. And that's the test I generally use to find out if I've written a mess - "Can I release this in the wild with my name attached to it". Well if the answer is "yes" and I will not have the urge to hide in a dark corner whenever I see someone else using it, then what the hell, why not actually release it.</p>
+
+<p>So to put my money where my mouth is, here are the libraries that I've decided to release open source. They are all Kohana 3.2 modules for now, with the ambition to upgrade them to 3.3 in the near future.</p>
+
+<ul>
+<li><a href="https://github.com/OpenBuildings/jam">Jam</a> - ORM replacement module, inspired by Kohana Jelly</li>
+<li><a href="https://github.com/OpenBuildings/jam-auth">Jam Auth</a> - user authentication and permissions with Jam, as well as external service login support (e.g. facebook)</li>
+<li><a href="https://github.com/OpenBuildings/services-manager">Services Manager</a> - A library to encapsulate talking to external services, with different configs for different environments</li>
+<li><a href="https://github.com/OpenBuildings/functest">FuncTest</a> - Functional Testing, inspired by ruby's Capybara, with selenium and native drivers</li>
+<li><a href="https://github.com/OpenBuildings/jamaker">Jamaker</a> - A Database population tool, inspired by Factory Girl</li>
+</ul>
+
+
+<p>These are all great tools that we use daily in production and have a lot of documentation and examples in their respective README's, I'll be really happy to get some feedback on these.</p>
+
+<p>Also, some of the previously released libraries have been updated</p>
+
+<ul>
+<li><a href="https://github.com/OpenBuildings/timestamped-migrations">Timestamped Migrations</a> - moved to kohana minion, more options, docs and consistency throughout.</li>
+<li><a href="https://github.com/OpenBuildings/asset-merger">Assets Merger</a> - added automatic tests to make sure the processors work.</li>
+</ul>
+
+
+<p>I'll try to present each one of these libraries on its own in future posts, but for now you can check out the docs of the libraries themselves.</p>
+]]></content>
+  </entry>
+  
+</feed>

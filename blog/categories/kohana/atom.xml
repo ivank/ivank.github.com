@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Kohana | Develop Simply]]></title>
+  <link href="http://ivank.github.com/blog/categories/kohana/atom.xml" rel="self"/>
+  <link href="http://ivank.github.com/"/>
+  <updated>2012-10-26T15:49:44+03:00</updated>
+  <id>http://ivank.github.com/</id>
+  <author>
+    <name><![CDATA[Ivan Kerin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Timestamped Migrations]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/timestamped-migrations/"/>
+    <updated>2011-11-07T22:51:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/timestamped-migrations</id>
+    <content type="html"><![CDATA[<p>All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the tools for that for <a href="http://kohanaframework.org/">Kohana 3</a> are of course ... you got it - lacking. There is <a href="https://github.com/jmhobbs/kohana-3-migrations">Kohana-3-migraitons</a> - but versioned migrations work only for a single developer - if that's your situation - I envy you, I really do - so much less headache. But when you try to collaborate database changes, especially with git/svn managing your files - you soon start to say very inappropriate words, very very loudly. So I went on and rewrote null77's excellent module <a href="http://code.google.com/p/kohana-migrations/">kohana-migrations</a> for Kohana 3 - <a href="https://github.com/OpenBuildings/timestamped-migrations">Timestamped Migrations</a>, but with some more sugar.</p>
+
+<p>``` bash
+git clone git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations</p>
+
+<p><code>
+Or
+</code> bash
+git submodule git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations
+git submodule update --init</p>
+
+<p>```</p>
+
+<p>So now your migrations will look like</p>
+
+<p><code>bash
+1319717756_initial.php
+1319717856_migrate_users_and_roles.php
+</code></p>
+
+<p>Might seem a bit too verbose, but it's a godsend when you have more than one person on a project - you can just drop a migration file and have it execute in just the right place and order - delightfully convenient.</p>
+
+<p>I personally detest web interfaces for those kind of tasks - exposing system tools to a webserver seem ... unclean, so I've ditched the controllers and views, and implemented simple CLI for this, using <a href="https://github.com/OpenBuildings/kohana-cli">Kohana-cli</a> and mimicking rails' syntax as much as possible. Check it out.</p>
+
+<p><code>bash
+kohana db:version
+kohana db:migrate
+kohana db:migrate:up
+kohana db:migrate:down --step=4
+kohana db:migrate:redo --version=1319717756
+kohana db:rollback
+</code></p>
+
+<p>You can read all about it at the github <a href="https://github.com/OpenBuildings/timestamped-migrations/blob/master/README.md">README file</a>. Enjoy.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Command Line Interfaces Rule]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/command-line-interfaces-rule/"/>
+    <updated>2011-11-07T22:02:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/command-line-interfaces-rule</id>
+    <content type="html"><![CDATA[<p>All the proper web framework those days have some sort of Command line tools - the first that I've personally encountered where rails and symfony and I haven't been able to live without them ever since, but <a href="http://kohanaframework.org/">Kohana 3</a> seems to be awfully backwards in that respect - no CLI in 2.3 and now no CLI in Kohana 3. They did structure it very well to create those tools - its just the tools themselves seem to be missing. Anyway here's my take on this.</p>
+
+<p><a href="https://github.com/OpenBuildings/kohana-cli">Kohana-cli</a></p>
+
+<p>``` bash
+git clone git://github.com/OpenBuildings/kohana-cli.git modules/kohana-cli</p>
+
+<p><code>
+Or
+</code> bash
+git submodule git://github.com/OpenBuildings/kohana-cli.git modules/kohana-cli
+git submodule update --init</p>
+
+<p>```</p>
+
+<p>To use it properly after you've downloaded the module you have to symlink or copy the kohana file from the root module directory to your root directory.</p>
+
+<p>``` bash
+cp modules/kohana-cli/kohana ./</p>
+
+<p>php kohana help
+./kohana help</p>
+
+<p>```</p>
+
+<p>Or if you want system-wide support</p>
+
+<p>``` bash
+cp modules/kohana-cli/kohana /usr/local/bin/</p>
+
+<p>kohana help</p>
+
+<p>```</p>
+
+<p>Alright - so now you're set to explore what commands you have</p>
+
+<p><code>bash
+kohana list
+</code></p>
+
+<p>This will go through all your modules and search for specially designated "command" folders which contain cli scripts. Now several of my own modules have predefined command line utilities but <code>kohana-cli</code> comes with some useful ones itself.</p>
+
+<p><code>bash
+kohana cache:clear
+kohana module:generate
+</code>
+You can get help for the commands with the usual syntax</p>
+
+<p><code>bash
+kohana help cache:clear
+kohana help module:generate
+</code></p>
+
+<p>And it's ridiculously easy to write your own CLI commands with color output and all that check out <code>cache:clear</code>'s source:</p>
+
+<p>``` php
+&lt;?php
+class Command_Cache extends Command
+{</p>
+
+<pre><code>const CLEAR_BRIEF = "Clear system cache and Cache";
+public function clear()
+{
+    //Call function and profile its start and end, last argument is the color of the output.
+    self::log_func(array(Cache::instance(), 'delete_all'), null, Command::OK);
+    self::log_func("system", array("rm -rf ".Kohana::$cache_dir."/*"), Command::OK);
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kohana Assets done right]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/kohana-assets-done-right/"/>
+    <updated>2011-11-07T21:06:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/kohana-assets-done-right</id>
+    <content type="html"><![CDATA[<p>The big boys in the framework wold all have some ways of managing your assets - CSS and JS files with proper merging, cache busters, minification and all jazz. <a href="http://kohanaframework.org/">Kohana 3</a> on the other hand - has only some modest efforts. None of them have all the features that seems to be present elsewhere. And I don't really have an explanation why - those are generally well known requirements for production sites. Anyway I was fed up with this state of affairs and I decided to just write my own solution. Here's what my dream asset manager thing must do:</p>
+
+<ul>
+<li>Merge arbitrary number of CSS and JS files into one file respectfully.</li>
+<li>Different behavior in different environments - keep separate files in development and merge in production</li>
+<li>Ease implementation of JS and CSS related languages - SASS, LESS, CofeeScript etc.</li>
+<li>Minify all the files, but have the ability to chose exceptions</li>
+<li>Ability to add small code snippets in between files so when they are merged in one big file it remains in the proper load placement.</li>
+<li>Bonus points for easy API.</li>
+</ul>
+
+
+<p>So I set of to implement all of this and more - and here is the fruit of a full day's work - <a href="https://github.com/OpenBuildings/asset-merger">The Asset-Merger</a>. Installation instructions</p>
+
+<p>``` bash
+git clone git://github.com/OpenBuildings/asset-merger.git modules/asset-merger</p>
+
+<p><code>
+Or
+</code> bash
+git submodule git://github.com/OpenBuildings/asset-merger.git modules/asset-merger
+git submodule update --init</p>
+
+<p>```</p>
+
+<p>The documentation is quite adequate I think, and will get you up to speed, but here are just a few highlights</p>
+
+<p>``` php
+&lt;?php echo Assets::factory('all')</p>
+
+<pre><code>-&gt;css('less/homepage.css.less')
+-&gt;css('jquery-ui-1.8.custom.css')
+-&gt;css('notifications.css')
+
+-&gt;js("http://use.typekit.com/sdfhkas.js")
+-&gt;js("http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js")
+-&gt;js("http://maps.google.com/maps/api/js?sensor=false")
+-&gt;js_block("try{Typekit.load();}catch(e){}")
+-&gt;js("main/general.js")
+-&gt;render();
+</code></pre>
+
+<p>?>                    <br/>
+```</p>
+
+<blockquote><p>less/homepage.css.<strong>less</strong></p></blockquote>
+
+<p>That's right - Engines! Just how the big boys are doing it. You can even chain them for proper power effect.</p>
+
+<blockquote><p>less/homepage.css.<strong>less</strong>.<strong>php</strong></p></blockquote>
+
+<p>It will get that you are including external files and it's not a very good practice to download and inline them (they are placed remotely for a reason). So they just appear as proper <code>link</code> or <code>script</code> tag.</p>
+
+<blockquote><p>js_block("try{Typekit.load();}catch(e){}")</p></blockquote>
+
+<p>This will output a nice inline <code>script</code> tag but in PRODUCTION environment - it will be inlined inside the merged Javascript file. That's right, no more messy javascript snippets inside your templates. Meaning that it will be cached along all your other assets in the browser cache.</p>
+
+<p>And here's a great simple touch that I haven't seen anywhere else before but find immensely satisfying - you can do a</p>
+
+<p>``` php
+&lt;?php echo Assets::factory('all')</p>
+
+<pre><code>-&gt;merge(TRUE)-&gt;process(TRUE)
+-&gt;css('less/homepage.css.less')
+-&gt;css('jquery-ui-1.8.custom.css')
+-&gt;css('notifications.css')
+</code></pre>
+
+<p>?>
+```
+And see the result of your hard labor. I know you can probably switch the environment, and that's probably better anyway, but to have a quick check if everything works correctly when its put together is quite nice.</p>
+
+<p>Now, asset-merger utilizes <code>filemtime</code> checks to see if it needs to recompile the files, which might be a bit costly in a production environment. But you can always cache this part as a <a href="http://kohanaframework.org/3.0/guide/kohana/fragments">Kohana Fragment</a> and live happy.</p>
+
+<p>``` php
+&lt;?php if ( ! Fragment::load('assets', Date::YEAR, true)): ?></p>
+
+<pre><code>&lt;?php echo Assets::factory('all')
+    -&gt;css('less/homepage.css.less')
+    -&gt;css('jquery-ui-1.8.custom.css')
+    -&gt;css('notifications.css')
+?&gt;
+</code></pre>
+
+<p>&lt;?php endif; ?>
+```
+You can cache the hell out of it because you will probably clear your cache on deploy anyway.</p>
+
+<p>I will be working on adding CDN support shortly.</p>
+]]></content>
+  </entry>
+  
+</feed>

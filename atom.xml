@@ -1,112 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
 
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Develop Simply</title>
-  <meta name="author" content="Ivan Kerin">
-
-  
-  <meta name="description" content="I&#8217;ve always been a believer that in order to write first class code, one has to write it as if they will be released in the wild - with all the &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://ivank.github.com/">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="/javascripts/ender.js"></script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <link href="/atom.xml" rel="alternate" title="Develop Simply" type="application/atom+xml">
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-26866049-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Develop Simply</a></h1>
-  
-    <h2>Ivan K's development musings</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:ivank.github.com" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div class="blog-index">
-  
-  
-  
-    <article>
-      
-  <header>
+  <title><![CDATA[Develop Simply]]></title>
+  <link href="http://ivank.github.com/atom.xml" rel="self"/>
+  <link href="http://ivank.github.com/"/>
+  <updated>2012-10-26T15:49:44+03:00</updated>
+  <id>http://ivank.github.com/</id>
+  <author>
+    <name><![CDATA[Ivan Kerin]]></name>
     
-      <h1 class="entry-title"><a href="/blog/2012/10/new-opensoure-libraries/">New Open Source Libraries</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
 
   
-
-
-<time datetime="2012-10-26T14:55:00+03:00" pubdate data-updated="true">Oct 26<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&#8217;ve always been a believer that in order to write first class code, one has to write it as if they will be released in the wild - with all the consistency, documentation and general bad-ass-ness that it requires. And that&#8217;s the test I generally use to find out if I&#8217;ve written a mess - &#8220;Can I release this in the wild with my name attached to it&#8221;. Well if the answer is &#8220;yes&#8221; and I will not have the urge to hide in a dark corner whenever I see someone else using it, then what the hell, why not actually release it.</p>
+  <entry>
+    <title type="html"><![CDATA[New open source libraries]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/new-opensoure-libraries/"/>
+    <updated>2012-10-26T14:55:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/new-opensoure-libraries</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve always been a believer that in order to write first class code, one has to write it as if they will be released in the wild - with all the consistency, documentation and general bad-ass-ness that it requires. And that&#8217;s the test I generally use to find out if I&#8217;ve written a mess - &#8220;Can I release this in the wild with my name attached to it&#8221;. Well if the answer is &#8220;yes&#8221; and I will not have the urge to hide in a dark corner whenever I see someone else using it, then what the hell, why not actually release it.</p>
 
 <p>So to put my money where my mouth is, here are the libraries that I&#8217;ve decided to release open source. They are all Kohana 3.2 modules for now, with the ambition to upgrade them to 3.3 in the near future.</p>
 
@@ -130,42 +42,15 @@
 
 
 <p>I&#8217;ll try to present each one of these libraries on its own in future posts, but for now you can check out the docs of the libraries themselves.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/10/jamming-to-the-future/">Jamming to the Future</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-26T12:55:00+03:00" pubdate data-updated="true">Oct 26<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>It&#8217;s been a long time since my last publication, but I&#8217;ve not been gone to a deserted island or anything, just working quietly in the shadows. And I think I am at last ready to come out and introduce what I and the Clippings team have been working on for so long. But first a very quick history tour.</p>
+  <entry>
+    <title type="html"><![CDATA[Jamming to the future]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/jamming-to-the-future/"/>
+    <updated>2012-10-26T12:55:00+03:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/jamming-to-the-future</id>
+    <content type="html"><![CDATA[<p>It&#8217;s been a long time since my last publication, but I&#8217;ve not been gone to a deserted island or anything, just working quietly in the shadows. And I think I am at last ready to come out and introduce what I and the Clippings team have been working on for so long. But first a very quick history tour.</p>
 
 <p>The Kohana framework is really great most of the time - great request handling, caching, module management, database query building etc., where I find it somewhat lacking (and I mean like What-the-hell-guys-put-your-shit-together type) - is the ORM. Yes it works for most of the basic use cases but its only a very thin layer over the Database builder. By the time we started the project there was <a href="http://jelly.jonathan-geiger.com/">Jelly</a> - a really inspired little ORM that promised a lot and did it with very little clean and concise code. I immoderately fell in love and started using it instead the built in ORM - and it was working great, up until the point I realized that it was a &#8220;dead&#8221; project and nobody actually added new stuff to it. No problem - I like to extend things - so little by little small pieces of code were added to the project by us and at one point I just decided - this is not Jelly anymore! And so we now have a new feature rich library for handling database persistence - <a href="https://github.com/OpenBuildings/jam">Jam</a>.</p>
 
@@ -188,42 +73,15 @@
 <hr />
 
 <p>P.S. Kudos to Jonathan Geiger and all of the maintainers of the jelly project - it really is a great inspiration. I tried to hold the spirit of jelly true, but with all the new functionality that had to be added I sort of abandoned the idea of &#8220;keeping it really small&#8221; and went with &#8220;add a lot of useful features&#8221; approach.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-11-27T02:29:00+02:00" pubdate data-updated="true">Nov 27<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Normal Widget</h2>
+  <entry>
+    <title type="html"><![CDATA[Writing Custom Widgets for Form Builder]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder/"/>
+    <updated>2011-11-27T02:29:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/writing-custom-widgets-for-form-builder</id>
+    <content type="html"><![CDATA[<h2>Normal Widget</h2>
 
 <p>In the last post <a href="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/">about the form builder</a> for <a href="http://kohanaframework.org/">Kohana 3.2</a> I&#8217;ve showed some basic examples of using the library. It&#8217;s great for when you quickly want to build a form and be done with it, but what if you have something more specific in mind - for example, a widget to display a rich textarea. (using CKEditor)</p>
 
@@ -423,42 +281,15 @@
 
 
 <p>So now you have a custom &#8220;help&#8221; option that every widget has, as well as custom error message and a custom template.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-11-26T18:53:00+02:00" pubdate data-updated="true">Nov 26<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I have a history with forms - all kinds of them - <em>Symfony Forms</em>, <em>Cake Forms</em>, <em>Kohana Forms</em>, <em>Rails Forms</em> - you name it. And every form builder had something missing - some feature that I had to build, some misconception about what is really desired of the builder. Some got it better than others - for example I am a big fan of rails form helper thingie. It has a ease-of-use feel to it that I hadn&#8217;t encountered elsewhere - but it does have some missing features that I always ended up implementing myself. Symfony on the other hand has quite a lot of features but it feels so complicated and cumbersome to use that I often don&#8217;t even bother. So I needed a form builder for <a href="http://kohanaframework.org/">Kohana 3.2</a> and decided to build one that had everything I dreamed of having - of course I ended up with a lot of compromises - but the result so far looks quite satisfying - <a href="https://github.com/OpenBuildings/form-builder">form-builder</a></p>
+  <entry>
+    <title type="html"><![CDATA[Introducing Kohana Form Builder]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder/"/>
+    <updated>2011-11-26T18:53:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/introducing-kohana-form-builder</id>
+    <content type="html"><![CDATA[<p>I have a history with forms - all kinds of them - <em>Symfony Forms</em>, <em>Cake Forms</em>, <em>Kohana Forms</em>, <em>Rails Forms</em> - you name it. And every form builder had something missing - some feature that I had to build, some misconception about what is really desired of the builder. Some got it better than others - for example I am a big fan of rails form helper thingie. It has a ease-of-use feel to it that I hadn&#8217;t encountered elsewhere - but it does have some missing features that I always ended up implementing myself. Symfony on the other hand has quite a lot of features but it feels so complicated and cumbersome to use that I often don&#8217;t even bother. So I needed a form builder for <a href="http://kohanaframework.org/">Kohana 3.2</a> and decided to build one that had everything I dreamed of having - of course I ended up with a lot of compromises - but the result so far looks quite satisfying - <a href="https://github.com/OpenBuildings/form-builder">form-builder</a></p>
 
 <h2>Requirements</h2>
 
@@ -573,42 +404,15 @@
 <p>That form is sufficient to view and edit the user&#8217;s properties, displaying errors on fail when appropriate and it&#8217;s all quite self-explanatory - the only concept different from the already established ones in Kohana and Jelly is the concept of &#8220;widgets&#8221; - you basically have functions that construct some kind of input tags - in this example they are <code>input</code>, <code>textarea</code>, <code>checkbox</code> and <code>checkboxes</code>. All of this is explained in the README</p>
 
 <p>The icing on the cake is that it reads Jelly Model&#8217;s rules and places html5 form validation whenever possible.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/11/big-update-to-migration/">Big Update to Migration</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-11-12T20:41:00+02:00" pubdate data-updated="true">Nov 12<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I was talking to the guys in the Kohana forum and the subject of &#8220;why should I use <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a> instead of minion&#8217;s migrations&#8221; came up. Why indeed. So I decided to up the game a bit. Doing funky stuff like reading the changes from the local database and then syncing those back to production is a bit too fragile for my tastes, and at least with RDBMS i want to be <em>really</em> sure what&#8217;s going to happen and what SQL queries will run, so I&#8217;m trying to reduce the &#8220;magic&#8221; as much as possible. There is however a lot of room for improvement, so what I ended up implementing was rails-style parsing of the filename to generate.</p>
+  <entry>
+    <title type="html"><![CDATA[Big update to migration]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/big-update-to-migration/"/>
+    <updated>2011-11-12T20:41:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/big-update-to-migration</id>
+    <content type="html"><![CDATA[<p>I was talking to the guys in the Kohana forum and the subject of &#8220;why should I use <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a> instead of minion&#8217;s migrations&#8221; came up. Why indeed. So I decided to up the game a bit. Doing funky stuff like reading the changes from the local database and then syncing those back to production is a bit too fragile for my tastes, and at least with RDBMS i want to be <em>really</em> sure what&#8217;s going to happen and what SQL queries will run, so I&#8217;m trying to reduce the &#8220;magic&#8221; as much as possible. There is however a lot of room for improvement, so what I ended up implementing was rails-style parsing of the filename to generate.</p>
 
 <h2>Migration Name Parsing</h2>
 
@@ -785,42 +589,15 @@
 <p>A nasty bug was fixed when when you specified already executed migration with &#8211;version it would execute all the others. Anyway, you should sleep happy now.</p>
 
 <p>Check out the code: <a href="https://github.com/jmhobbs/kohana-3-migrations">timestamped-migrations</a>.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/11/timestamped-migrations/">Timestamped Migrations</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-11-07T22:51:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the tools for that for <a href="http://kohanaframework.org/">Kohana 3</a> are of course &#8230; you got it - lacking. There is <a href="https://github.com/jmhobbs/kohana-3-migrations">Kohana-3-migraitons</a> - but versioned migrations work only for a single developer - if that&#8217;s your situation - I envy you, I really do - so much less headache. But when you try to collaborate database changes, especially with git/svn managing your files - you soon start to say very inappropriate words, very very loudly. So I went on and rewrote null77&#8217;s excellent module <a href="http://code.google.com/p/kohana-migrations/">kohana-migrations</a> for Kohana 3 - <a href="https://github.com/OpenBuildings/timestamped-migrations">Timestamped Migrations</a>, but with some more sugar.</p>
+  <entry>
+    <title type="html"><![CDATA[Timestamped Migrations]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/timestamped-migrations/"/>
+    <updated>2011-11-07T22:51:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/timestamped-migrations</id>
+    <content type="html"><![CDATA[<p>All non-trivial web projects that use RDBMS need some sort of database migration system to manage database changes and schema evolution. But the tools for that for <a href="http://kohanaframework.org/">Kohana 3</a> are of course &#8230; you got it - lacking. There is <a href="https://github.com/jmhobbs/kohana-3-migrations">Kohana-3-migraitons</a> - but versioned migrations work only for a single developer - if that&#8217;s your situation - I envy you, I really do - so much less headache. But when you try to collaborate database changes, especially with git/svn managing your files - you soon start to say very inappropriate words, very very loudly. So I went on and rewrote null77&#8217;s excellent module <a href="http://code.google.com/p/kohana-migrations/">kohana-migrations</a> for Kohana 3 - <a href="https://github.com/OpenBuildings/timestamped-migrations">Timestamped Migrations</a>, but with some more sugar.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>git clone git://github.com/OpenBuildings/timestamped-migrations.git modules/timestamped-migrations
@@ -865,42 +642,15 @@
 
 
 <p>You can read all about it at the github <a href="https://github.com/OpenBuildings/timestamped-migrations/blob/master/README.md">README file</a>. Enjoy.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/11/command-line-interfaces-rule/">Command Line Interfaces Rule</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-11-07T22:02:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>All the proper web framework those days have some sort of Command line tools - the first that I&#8217;ve personally encountered where rails and symfony and I haven&#8217;t been able to live without them ever since, but <a href="http://kohanaframework.org/">Kohana 3</a> seems to be awfully backwards in that respect - no CLI in 2.3 and now no CLI in Kohana 3. They did structure it very well to create those tools - its just the tools themselves seem to be missing. Anyway here&#8217;s my take on this.</p>
+  <entry>
+    <title type="html"><![CDATA[Command Line Interfaces Rule]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/command-line-interfaces-rule/"/>
+    <updated>2011-11-07T22:02:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/command-line-interfaces-rule</id>
+    <content type="html"><![CDATA[<p>All the proper web framework those days have some sort of Command line tools - the first that I&#8217;ve personally encountered where rails and symfony and I haven&#8217;t been able to live without them ever since, but <a href="http://kohanaframework.org/">Kohana 3</a> seems to be awfully backwards in that respect - no CLI in 2.3 and now no CLI in Kohana 3. They did structure it very well to create those tools - its just the tools themselves seem to be missing. Anyway here&#8217;s my take on this.</p>
 
 <p><a href="https://github.com/OpenBuildings/kohana-cli">Kohana-cli</a></p>
 
@@ -995,42 +745,15 @@
 </span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
 </span></code></pre></td></tr></table></div></figure>
 
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/11/kohana-assets-done-right/">Kohana Assets Done Right</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-11-07T21:06:00+02:00" pubdate data-updated="true">Nov 7<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>The big boys in the framework wold all have some ways of managing your assets - CSS and JS files with proper merging, cache busters, minification and all jazz. <a href="http://kohanaframework.org/">Kohana 3</a> on the other hand - has only some modest efforts. None of them have all the features that seems to be present elsewhere. And I don&#8217;t really have an explanation why - those are generally well known requirements for production sites. Anyway I was fed up with this state of affairs and I decided to just write my own solution. Here&#8217;s what my dream asset manager thing must do:</p>
+  <entry>
+    <title type="html"><![CDATA[Kohana Assets done right]]></title>
+    <link href="http://ivank.github.com/blog/2011/11/kohana-assets-done-right/"/>
+    <updated>2011-11-07T21:06:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2011/11/kohana-assets-done-right</id>
+    <content type="html"><![CDATA[<p>The big boys in the framework wold all have some ways of managing your assets - CSS and JS files with proper merging, cache busters, minification and all jazz. <a href="http://kohanaframework.org/">Kohana 3</a> on the other hand - has only some modest efforts. None of them have all the features that seems to be present elsewhere. And I don&#8217;t really have an explanation why - those are generally well known requirements for production sites. Anyway I was fed up with this state of affairs and I decided to just write my own solution. Here&#8217;s what my dream asset manager thing must do:</p>
 
 <ul>
 <li>Merge arbitrary number of CSS and JS files into one file respectfully.</li>
@@ -1140,140 +863,7 @@
 <p>You can cache the hell out of it because you will probably clear your cache on deploy anyway.</p>
 
 <p>I will be working on adding CDN support shortly.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2012/10/new-opensoure-libraries/">New open source libraries</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/10/jamming-to-the-future/">Jamming to the future</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/11/writing-custom-widgets-for-form-builder/">Writing Custom Widgets for Form Builder</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/11/introducing-kohana-form-builder/">Introducing Kohana Form Builder</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/11/big-update-to-migration/">Big update to migration</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
-  </ul>
-  
-  <a href="https://github.com/openbuildings">@openbuildings</a> on GitHub
-  
-  <script type="text/javascript">
-    $.domReady(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'openbuildings',
-            count: 5,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-
-<section class="googleplus googleplus-hidden">
-  <h1>
-    <a href="https://plus.google.com/ikerin@gmail.com?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-  
-</aside>
-
-    </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - Ivan Kerin -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
-
-</footer>
-  
-
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>
+</feed>
