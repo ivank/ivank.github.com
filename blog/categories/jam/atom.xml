@@ -4,7 +4,7 @@
   <title><![CDATA[Category: jam | Develop Simply]]></title>
   <link href="http://ivank.github.com/blog/categories/jam/atom.xml" rel="self"/>
   <link href="http://ivank.github.com/"/>
-  <updated>2012-10-26T20:26:29+03:00</updated>
+  <updated>2012-10-29T14:49:12+02:00</updated>
   <id>http://ivank.github.com/</id>
   <author>
     <name><![CDATA[Ivan Kerin]]></name>
@@ -12,6 +12,240 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Setting up bad ass file uploading]]></title>
+    <link href="http://ivank.github.com/blog/2012/10/setting-up-bad-ass-file-uploading/"/>
+    <updated>2012-10-29T10:52:00+02:00</updated>
+    <id>http://ivank.github.com/blog/2012/10/setting-up-bad-ass-file-uploading</id>
+    <content type="html"><![CDATA[<p>So you just want to upload files, maybe resize some images, maybe even do some validation - well you're in luck. This quick tutorial will show you how to do this the easy way with <a href="https://github.com/OpenBuildings/jam">Jam</a>.</p>
+
+<p>First off, lets create a table for our model. We'll be using <a href="https://github.com/OpenBuildings/timestamped-migrations">timestamped-migrations</a> for that:</p>
+
+<pre><code>minion db:generate --name=create_table_paintings
+&gt; 1351501477_create_table_paintings.php Migration File Generated
+</code></pre>
+
+<p>Now we can modify the migration file to add the nesessary fields:</p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct script access.');</p>
+
+<p>class Create_Table_Paintings extends Migration
+{</p>
+
+<pre><code>public function up()
+{
+    $this-&gt;create_table('paintings', array(
+        'name' =&gt; 'string',
+        'file' =&gt; 'string',
+    ));
+}
+
+public function down()
+{
+    $this-&gt;drop_table('paintings');
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>The id column will be added automatically. You can disable that behavior but its generally useful and in this case saves us some bit of writing. And always having an ID column is a good DB practice anyway.</p>
+
+<p>Now we run the migration to create our paintings table in the database.</p>
+
+<pre><code>minion db:migrate
+</code></pre>
+
+<p>We got the table now we can create the model corresponding to the table. Put this file in your <code>APPPATH/classes/model/painting.php</code></p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct script access.');</p>
+
+<p>class Model_Painting extends Jam_Model {</p>
+
+<pre><code>public static function initialize(Jam_Meta $meta)
+{
+    $meta-&gt;fields(array(
+        'id' =&gt; Jam::field('primary'),
+        'name' =&gt; Jam::field('string'),
+        'file'=&gt; Jam::field('upload', array('server' =&gt; 'local')),
+    ));
+
+    $this-&gt;validator('file', 'name', array('present' =&gt; TRUE));
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>Here we add the 3 columns from the table to map them to model fields. Primary field is a special one, used for fining by index later on. As for the 'file' field - it's an "upload" field which requires you to set a server for the upload. You will generally keep your files on your local machine - and to do that we set the server to 'local', but you can set this to various other server types, for example rackspace cloudfiles or ftp server - and it will upload the files there and display them with the appropriate public URL - but don't worry about that for now.</p>
+
+<p>The default upload locations for local are DOCROOT/upload/temp, and DOCROOT/upload/{model}/{id}/ but you can change them in the config. And we also add validation to require the presense of both name and file fields so the model will not be valid if the user does not input any of those two.</p>
+
+<p>So anyway, we now proceed to the controller:</p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct script access.');</p>
+
+<p>class Controller_Paintings extends Controller
+{</p>
+
+<pre><code>public function action_show()
+{
+    $painting = Jam::factory('painting', $this-&gt;request-&gt;param('id'));
+    $this-&gt;response-&gt;body(View::factory('paintings/show', array('painting' =&gt; $painting)));
+}
+
+public function action_new()
+{
+    $painting = Jam::factory('painting');
+
+    if ($this-&gt;request-&gt;method() === Request::POST)
+    {
+        $data = $this-&gt;request-&gt;post();
+
+        if (Upload::not_empty($_FILES['file']))
+        {
+            $data['file'] = $_FILES['file'];
+        }
+
+        if ($painting-&gt;set($data)-&gt;check())
+        {
+            $painting-&gt;save();
+            $this-&gt;request-&gt;redirect('paintings/show/'.$painting-&gt;id());
+        }
+    }
+
+    $this-&gt;response-&gt;body(View::factory('paintings/form', array('painting' =&gt; $painting)));
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>With the show action we just display the painting, While the secound - "new" action does all the work of uploading, validating and saving the model. The uploading magic happens in "check" method - we upload the file to the temporary folder and serve it from there, should the validation fail - we will still have the file uploaded so the user will not have to upload it a second time, and we can also display a thumbnail. If everything is OK then ->check() returns TRUE, and in the ->save() method the file gets moved to its final destination.</p>
+
+<p>The corresponding views to make this all work are:</p>
+
+<p><code>APPPATH/views/paintings/form.php</code>
+```php
+&lt;?php $form = Jam::form($painting) ?>
+&lt;?php echo Form::open('paintings/new', array('enctype' => 'multipart/form-data')) ?></p>
+
+<pre><code>&lt;?php echo $form-&gt;row('input', 'name') ?&gt;
+&lt;?php echo $form-&gt;row('file', 'file', array('temp_source' =&gt; TRUE)) ?&gt;
+&lt;?php echo Form::submit('submit', "Create Painting") ?&gt;
+</code></pre>
+
+<p>&lt;?php echo Form::close(); ?>
+```</p>
+
+<p><code>APPPATH/views/paintings/show.php</code>
+<code>php
+&lt;img src="&lt;?php echo $painting-&gt;file-&gt;url() ?&gt;" alt="&lt;?php echo $painting-&gt;name() ?&gt;"/&gt;
+</code></p>
+
+<p>Well that's out of the way and we can start palying with this in our browser. But there are still some things we can modify to make this even better. Say you want to limit to uploading to only images, by using the built in uploaded validator, and we'll add a thumbnail while we're at it:</p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct script access.');</p>
+
+<p>class Model_Painting extends Jam_Model {</p>
+
+<pre><code>public static function initialize(Jam_Meta $meta)
+{
+    $meta-&gt;fields(array(
+        'id' =&gt; Jam::field('primary'),
+        'name' =&gt; Jam::field('string'),
+        'file'=&gt; Jam::field('upload', array(
+            'server' =&gt; 'local'
+            'thumbnails' =&gt; array(
+                'thumb' =&gt; array(
+                    'resize' =&gt; array(150, 150)
+                )
+            )
+        )),
+    ));
+
+    $this
+        -&gt;validator('file', 'name', array('present' =&gt; TRUE))
+        -&gt;validator('file', array('uploaded' =&gt; array('only' =&gt; 'images', 'minimum_width' =&gt; 200, 'minimum_height' =&gt; 200)))
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>Now we can add a thumbnail to form field, so that when the validation fails, we can see the image that's already uploaded:</p>
+
+<p>```php
+&lt;?php $form = Jam::form($painting) ?>
+&lt;?php echo Form::open('paintings/new', array('enctype' => 'multipart/form-data')) ?></p>
+
+<pre><code>&lt;?php echo $form-&gt;row('input', 'name') ?&gt;
+&lt;?php if ( ! $form-&gt;object()-&gt;file-&gt;is_empty()): ?&gt;
+    &lt;img src="&lt;?php echo $form-&gt;object()-&gt;file-&gt;url('thumb') ?&gt;" alt="&lt;?php echo $painting-&gt;name() ?&gt;"/&gt;
+&lt;?php endif ?&gt;
+&lt;?php echo $form-&gt;row('file', 'file', array('temp_source' =&gt; TRUE)) ?&gt;
+&lt;?php echo Form::submit('submit', "Create Painting") ?&gt;
+</code></pre>
+
+<p>&lt;?php echo Form::close(); ?>
+```</p>
+
+<p>The upload Field is very flexible - it can accept different sources for the images, for example you can pass a URL to the field and it will download it. You can use php://input for ajax uploads, or if you upload it manually to the temp dir by any other method (Flash uploader for example) it will work appropriately.</p>
+
+<p>As a last touch we will add 2 columns to the table - file_width and file_height - and set it up so they get automatically populated with the width and height of the image.</p>
+
+<pre><code>minion db:generate --name=add_file_width_and_file_height_to_paintings
+minion db:migrate
+</code></pre>
+
+<p>Jam Fields only know and can operate on themselves, and can't change other fields. So this must be done through a behavior. Luckily there is just such a bihavior.</p>
+
+<p>```php
+&lt;?php defined('SYSPATH') OR die('No direct script access.');</p>
+
+<p>class Model_Painting extends Jam_Model {</p>
+
+<pre><code>public static function initialize(Jam_Meta $meta)
+{
+    $meta-&gt;behaviors(array(
+        'file' =&gt; Jam::behavior('uploadable', array(
+            'save_size' =&gt; TRUE,
+            'server' =&gt; 'local'
+            'thumbnails' =&gt; array(
+                'thumb' =&gt; array(
+                    'resize' =&gt; array(150, 150)
+                )
+            )
+        ))
+    ));
+
+    $meta-&gt;fields(array(
+        'id' =&gt; Jam::field('primary'),
+        'name' =&gt; Jam::field('string'),
+    ));
+
+    $this
+        -&gt;validator('file', 'name', array('present' =&gt; TRUE))
+        -&gt;validator('file', array('uploaded' =&gt; array('only' =&gt; 'images', 'minimum_width' =&gt; 200, 'minimum_height' =&gt; 200)))
+}
+</code></pre>
+
+<p>}
+?>
+```</p>
+
+<p>And we're done. Everytime a new image is uploaded we will get a proper file_width and file_height.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[New open source libraries]]></title>
